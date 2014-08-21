@@ -22,20 +22,19 @@ public class CallableStatementLoggingHandler extends PreparedStatementLoggingHan
     }
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        String methodName = "invoke() ";
-        if (logger.isDebugEnabled())
-            logger.debug(methodName + "method = " + method);
+        final String methodName = "invoke() ";
+        logger.debug("invoke() method = {}", method);
+
         Object r = null;
         try {
             boolean toLog = (StatementLogger.isInfoEnabled() || SlowQueryLogger.isInfoEnabled()) && executeMethods.contains(method.getName());
             long t1 = 0;
             if (toLog)
                 t1 = System.nanoTime();
-            if (logger.isDebugEnabled())
-                logger.debug(methodName + "before method call..");
+            logger.debug(methodName + "before method call..");
             r = method.invoke(target, args);
-            if (logger.isDebugEnabled())
-                logger.debug(methodName + "after method call. result = " + r);
+            logger.debug(methodName + "after method call. result = {}", r);
+
             if (setMethods.contains(method.getName()) && args[0] instanceof Integer)
                 parameters.put(args[0], args[1]);
             if (setMethods.contains(method.getName()) && args[0] instanceof String)
@@ -49,8 +48,7 @@ public class CallableStatementLoggingHandler extends PreparedStatementLoggingHan
                 StringBuffer s = LogUtils.createLogEntry(method, sql, parameters, namedParameters);
 
                 if (ConfigurationParameters.showTime) {
-                    BigDecimal t = (new BigDecimal(t2)).subtract(new BigDecimal(t1)).divide(new BigDecimal(1000000000));
-                    s.append(" ").append(t).append(" s.");
+                    s.append(" ").append(time/1000000000.0).append(" s.");
                 }
 
                 StatementLogger.info(s.toString());

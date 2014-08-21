@@ -47,8 +47,7 @@ public class PreparedStatementLoggingHandler implements InvocationHandler {
                 long t2 = System.nanoTime();
                 long time = t2 - t1;
                 if (ConfigurationParameters.showTime) {
-                    BigDecimal t = (new BigDecimal(t2)).subtract(new BigDecimal(t1)).divide(new BigDecimal(1000000000));
-                    sb.append(" ").append(t).append(" s.");
+                    sb.append(" ").append(time/1000000000.0).append(" s.");
                 }
 
                 StatementLogger.info(sb.toString());
