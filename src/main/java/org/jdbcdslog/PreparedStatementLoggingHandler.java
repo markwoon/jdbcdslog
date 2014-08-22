@@ -2,7 +2,6 @@ package org.jdbcdslog;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Arrays;
@@ -47,12 +46,12 @@ public class PreparedStatementLoggingHandler implements InvocationHandler {
                 long t2 = System.nanoTime();
                 long time = t2 - t1;
                 if (ConfigurationParameters.showTime) {
-                    sb.append(" ").append(time/1000000000.0).append(" s.");
+                    sb.append(" ").append(String.format("%.9f", time/1000000000.0)).append(" s.");
                 }
 
                 StatementLogger.info(sb.toString());
 
-                if (time >= ConfigurationParameters.slowQueryThreshold) {
+                if (time/1000000 >= ConfigurationParameters.slowQueryThreshold) {
                     SlowQueryLogger.info(sb.toString());
                 }
             }

@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.util.TreeMap;
@@ -48,12 +47,12 @@ public class CallableStatementLoggingHandler extends PreparedStatementLoggingHan
                 StringBuffer s = LogUtils.createLogEntry(method, sql, parameters, namedParameters);
 
                 if (ConfigurationParameters.showTime) {
-                    s.append(" ").append(time/1000000000.0).append(" s.");
+                    s.append(" ").append(String.format("%.9f", time/1000000000.0)).append(" s.");
                 }
 
                 StatementLogger.info(s.toString());
 
-                if (time >= ConfigurationParameters.slowQueryThreshold) {
+                if (time/1000000 >= ConfigurationParameters.slowQueryThreshold) {
                     SlowQueryLogger.info(s.toString());
                 }
             }
