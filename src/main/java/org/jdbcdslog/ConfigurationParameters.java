@@ -16,6 +16,7 @@ public class ConfigurationParameters {
     static boolean logText = false;
     static Boolean showTime = false;
     static boolean printStackTrace = false;
+    static boolean inlineQueryParams = true;
     static RdbmsSpecifics rdbmsSpecifics = new OracleRdbmsSpecifics(); // oracle is default db.
 
     static {
@@ -32,6 +33,7 @@ public class ConfigurationParameters {
             initLogText();
             initPrintStackTrace();
             initShowTime();
+            initInlineQueryParams();
             initRdbmsSpecifics();
 
         } catch (Exception e) {
@@ -76,6 +78,11 @@ public class ConfigurationParameters {
         if ("true".equalsIgnoreCase(isShowTime)) {
             showTime = true;
         }
+    }
+
+    private static void initInlineQueryParams() {
+        String isInlineQueryParams = props.getProperty("jdbcdslog.inlineQueryParams", "true");
+        inlineQueryParams = ("true".equalsIgnoreCase(isInlineQueryParams)) ;
     }
 
     private static void initRdbmsSpecifics() {

@@ -40,8 +40,7 @@ public class PreparedStatementLoggingHandler implements InvocationHandler {
                 parameters = new TreeMap();
 
             if (toLog) {
-                // StringBuffer sb = LogUtils.createLogEntry(method, sql, parametersToString(), null);
-                StringBuffer sb = LogUtils.createLogEntry(sql, parameters);
+                StringBuffer sb = LogUtils.createLogEntry(method, sql, parameters, null);
 
                 long t2 = System.nanoTime();
                 long time = t2 - t1;
@@ -58,7 +57,7 @@ public class PreparedStatementLoggingHandler implements InvocationHandler {
             if (r instanceof ResultSet)
                 r = ResultSetLoggingHandler.wrapByResultSetProxy((ResultSet) r);
         } catch (Throwable t) {
-            LogUtils.handleException(t, StatementLogger.getLogger(), LogUtils.createLogEntry(sql, parameters));
+            LogUtils.handleException(t, StatementLogger.getLogger(), LogUtils.createLogEntry(method, sql, parameters, null));
         }
         return r;
     }

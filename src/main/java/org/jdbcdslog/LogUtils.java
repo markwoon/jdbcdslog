@@ -2,7 +2,7 @@ package org.jdbcdslog;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Set;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("rawtypes")
 public class LogUtils {
 
     static Logger logger = LoggerFactory.getLogger(LogUtils.class);
@@ -30,23 +29,55 @@ public class LogUtils {
         }
     }
 
-    public static StringBuffer createLogEntry(Method method, String sql, TreeMap parameters, TreeMap namedParameters) {
+    public static StringBuffer createLogEntry(Method method, String sql, TreeMap<Integer,Object> parameters, TreeMap<String,Object> namedParameters) {
         StringBuffer s = new StringBuffer();
         if (method != null) {
             s.append(method.getDeclaringClass().getName()).append(".").append(method.getName()).append(": ");
         }
 
-        if (parameters != null && !parameters.isEmpty()) {
-            s.append(createLogEntry(sql, parameters));
-        } else {
-            s.append(createLogEntryForNamedParameters(sql, namedParameters));
+        if (ConfigurationParameters.inlineQueryParams) {
+            if (parameters != null && !parameters.isEmpty()) {
+                appendSqlWithInlineIndexedParams(s, sql, parameters);
+            } else {
+                appendSqlWithInlineNamedParams(s, sql, namedParameters);
+            }
+        } else {    // display separate query parameters
+            appendSqlWithSeparateParams(s, sql, parameters, namedParameters);
+
         }
 
         return s;
     }
 
-    public static StringBuffer createLogEntry(String sql, TreeMap parameters) {
-        StringBuffer s = new StringBuffer();
+    public static StringBuffer createLogEntryForInlineIndexedParams(String sql, TreeMap<Integer,Object> parameters) {
+        StringBuffer sb = new StringBuffer();
+        appendSqlWithInlineIndexedParams(sb, sql, parameters);
+        return sb;
+    }
+
+    public static StringBuffer createLogEntryForInlineNamedParams(String sql, TreeMap<String,Object> namedParameters) {
+        StringBuffer sb = new StringBuffer();
+        appendSqlWithInlineNamedParams(sb, sql, namedParameters);
+        return sb;
+    }
+
+    private static void appendSqlWithSeparateParams(StringBuffer s,
+                                                    String sql,
+                                                    TreeMap<Integer, Object> parameters,
+                                                    TreeMap<String, Object> namedParameters) {
+        if (sql != null) {
+            s.append(sql);
+        }
+        if (parameters != null && !parameters.isEmpty()) {
+            s.append(" parameters: ")
+                .append(parameters);
+        } else if (namedParameters != null && !namedParameters.isEmpty()){
+            s.append(" named parameters: ")
+                .append(namedParameters);
+        }
+    }
+
+    private static void appendSqlWithInlineIndexedParams(StringBuffer sb, String sql, TreeMap<Integer,Object> parameters) {
 
         if (sql != null) {
             int questionMarkCount = 1;
@@ -60,26 +91,20 @@ public class LogUtils {
             }
             sql = String.valueOf(m.appendTail(stringBuffer));
 
-            s.append(sql).append(";");
+            sb.append(sql).append(";");
         }
-
-        return s;
     }
 
-    @SuppressWarnings("unchecked")
-    public static StringBuffer createLogEntryForNamedParameters(String sql, TreeMap namedParameters) {
-        StringBuffer s = new StringBuffer();
-
+    private static void appendSqlWithInlineNamedParams(StringBuffer sb, String sql, TreeMap<String,Object> namedParameters) {
         if (sql != null) {
             if (namedParameters != null && !namedParameters.isEmpty()) {
-                for (String key : (Set<String>) namedParameters.keySet()) {
-                    sql = sql.replaceAll(NAMED_PARAMETERS_PREFIX + key, ConfigurationParameters.rdbmsSpecifics.formatParameter(namedParameters.get(key)));
+                for (Entry<String, Object> entry : namedParameters.entrySet()) {
+                    sql = sql.replaceAll(NAMED_PARAMETERS_PREFIX + entry.getKey(), ConfigurationParameters.rdbmsSpecifics.formatParameter(entry.getValue()));
                 }
             }
-            s.append(sql).append(";");
+            sb.append(sql).append(";");
         }
 
-        return s;
     }
 
     public static String getStackTrace() {
