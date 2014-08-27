@@ -46,10 +46,7 @@ public class ResultSetLoggingHandler implements InvocationHandler {
                 s.append(" Total Results ").append(resultCount);
             }
 
-
-            if (ConfigurationParameters.showTime) {
-                s.append(" ").append(String.format("%.9f", time/1000000000.0)).append(" s.");
-            }
+            LogUtils.appendElapsedTime(s, time);
 
             ResultSetLogger.info(s.toString());
         }

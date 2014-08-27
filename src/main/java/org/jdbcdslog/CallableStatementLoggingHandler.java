@@ -52,9 +52,7 @@ public class CallableStatementLoggingHandler extends PreparedStatementLoggingHan
 
                 StringBuffer s = LogUtils.createLogEntry(method, sql, parameters, namedParameters);
 
-                if (ConfigurationParameters.showTime) {
-                    s.append(" ").append(String.format("%.9f", time/1000000000.0)).append(" s.");
-                }
+                LogUtils.appendElapsedTime(s, time);
 
                 StatementLogger.info(s.toString());
 

@@ -29,6 +29,13 @@ public class LogUtils {
         }
     }
 
+    public static StringBuffer appendElapsedTime(StringBuffer sb, long elapsedTimeInNano) {
+        if (ConfigurationParameters.showTime) {
+            sb.append("\nElapsed Time: ").append(String.format("%.9f", elapsedTimeInNano/1000000000.0)).append(" s.");
+        }
+        return sb;
+
+    }
     public static StringBuffer createLogEntry(Method method, String sql, TreeMap<Integer,Object> parameters, TreeMap<String,Object> namedParameters) {
         StringBuffer s = new StringBuffer();
         if (method != null) {

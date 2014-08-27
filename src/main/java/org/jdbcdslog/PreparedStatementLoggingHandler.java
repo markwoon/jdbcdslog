@@ -52,9 +52,8 @@ public class PreparedStatementLoggingHandler implements InvocationHandler {
 
                 long t2 = System.nanoTime();
                 long time = t2 - t1;
-                if (ConfigurationParameters.showTime) {
-                    sb.append(" ").append(String.format("%.9f", time/1000000000.0)).append(" s.");
-                }
+
+                LogUtils.appendElapsedTime(sb, time);
 
                 StatementLogger.info(sb.toString());
 

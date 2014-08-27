@@ -29,12 +29,11 @@ public class StatementLoggingHandler implements InvocationHandler {
                 r = ResultSetLoggingHandler.wrapByResultSetProxy((ResultSet) r);
             if (toLog) {
                 long t2 = System.nanoTime();
-                StringBuffer sb = LogUtils.createLogEntry(method, args == null ? null : args[0].toString(), null, null);
                 long time = t2 - t1;
 
-                if (ConfigurationParameters.showTime) {
-                    sb.append(" ").append(String.format("%.9f", time/1000000000.0)).append(" s.");
-                }
+                StringBuffer sb = LogUtils.createLogEntry(method, args == null ? null : args[0].toString(), null, null);
+
+                LogUtils.appendElapsedTime(sb, time);
 
                 StatementLogger.info(sb.toString());
 
