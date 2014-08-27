@@ -31,7 +31,7 @@ public class StatementLoggingHandler implements InvocationHandler {
                 long t2 = System.nanoTime();
                 long time = t2 - t1;
 
-                StringBuffer sb = LogUtils.createLogEntry(method, args == null ? null : args[0].toString(), null, null);
+                StringBuilder sb = LogUtils.createLogEntry(method, args == null ? null : args[0].toString(), null, null);
 
                 LogUtils.appendElapsedTime(sb, time);
 

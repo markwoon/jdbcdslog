@@ -48,7 +48,7 @@ public class PreparedStatementLoggingHandler implements InvocationHandler {
             }
 
             if (toLog) {
-                StringBuffer sb = LogUtils.createLogEntry(method, sql, parameters, null);
+                StringBuilder sb = LogUtils.createLogEntry(method, sql, parameters, null);
 
                 long t2 = System.nanoTime();
                 long time = t2 - t1;

@@ -50,7 +50,7 @@ public class CallableStatementLoggingHandler extends PreparedStatementLoggingHan
                 long t2 = System.nanoTime();
                 long time = t2 - t1;
 
-                StringBuffer s = LogUtils.createLogEntry(method, sql, parameters, namedParameters);
+                StringBuilder s = LogUtils.createLogEntry(method, sql, parameters, namedParameters);
 
                 LogUtils.appendElapsedTime(s, time);
 

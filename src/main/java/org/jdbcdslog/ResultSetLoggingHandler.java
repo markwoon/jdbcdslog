@@ -29,7 +29,7 @@ public class ResultSetLoggingHandler implements InvocationHandler {
 
             String fullMethodName = method.getDeclaringClass().getName() + "." + method.getName();
             ResultSetMetaData md = target.getMetaData();
-            StringBuffer s = new StringBuffer(fullMethodName);
+            StringBuilder s = new StringBuilder(fullMethodName);
 
             if ((Boolean) r) {
                 s.append(" {");

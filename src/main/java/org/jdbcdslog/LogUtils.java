@@ -16,7 +16,7 @@ public class LogUtils {
 
     private final static String NAMED_PARAMETERS_PREFIX = ":";
 
-    public static void handleException(Throwable e, Logger l, StringBuffer msg) throws Throwable {
+    public static void handleException(Throwable e, Logger l, StringBuilder msg) throws Throwable {
         if (e instanceof InvocationTargetException) {
             Throwable t = ((InvocationTargetException) e).getTargetException();
             if (l.isErrorEnabled())
@@ -29,15 +29,36 @@ public class LogUtils {
         }
     }
 
-    public static StringBuffer appendElapsedTime(StringBuffer sb, long elapsedTimeInNano) {
+    /**
+     * Append Elapsed Time to log message if it is configured to be included.
+     *
+     * @param sb
+     * @param elapsedTimeInNano
+     * @return
+     */
+    public static StringBuilder appendElapsedTime(StringBuilder sb, long elapsedTimeInNano) {
         if (ConfigurationParameters.showTime) {
             sb.append("\nElapsed Time: ").append(String.format("%.9f", elapsedTimeInNano/1000000000.0)).append(" s.");
         }
         return sb;
 
     }
-    public static StringBuffer createLogEntry(Method method, String sql, TreeMap<Integer,Object> parameters, TreeMap<String,Object> namedParameters) {
-        StringBuffer s = new StringBuffer();
+
+
+    public static StringBuilder appendStackTrace(StringBuilder sb) {
+        if (!ConfigurationParameters.printStackTrace) {
+            return sb;
+        }
+
+        StackTraceElement stackTraces[] = new Throwable().getStackTrace();
+
+        sb.append("\nat ").append(stackTraces[4]);
+
+        return sb;
+    }
+
+    public static StringBuilder createLogEntry(Method method, String sql, TreeMap<Integer,Object> parameters, TreeMap<String,Object> namedParameters) {
+        StringBuilder s = new StringBuilder();
         if (method != null) {
             s.append(method.getDeclaringClass().getName()).append(".").append(method.getName()).append(": ");
         }
@@ -56,19 +77,19 @@ public class LogUtils {
         return s;
     }
 
-    public static StringBuffer createLogEntryForInlineIndexedParams(String sql, TreeMap<Integer,Object> parameters) {
-        StringBuffer sb = new StringBuffer();
+    public static StringBuilder createLogEntryForInlineIndexedParams(String sql, TreeMap<Integer,Object> parameters) {
+        StringBuilder sb = new StringBuilder();
         appendSqlWithInlineIndexedParams(sb, sql, parameters);
         return sb;
     }
 
-    public static StringBuffer createLogEntryForInlineNamedParams(String sql, TreeMap<String,Object> namedParameters) {
-        StringBuffer sb = new StringBuffer();
+    public static StringBuilder createLogEntryForInlineNamedParams(String sql, TreeMap<String,Object> namedParameters) {
+        StringBuilder sb = new StringBuilder();
         appendSqlWithInlineNamedParams(sb, sql, namedParameters);
         return sb;
     }
 
-    private static void appendSqlWithSeparateParams(StringBuffer s,
+    private static void appendSqlWithSeparateParams(StringBuilder s,
                                                     String sql,
                                                     TreeMap<Integer, Object> parameters,
                                                     TreeMap<String, Object> namedParameters) {
@@ -84,25 +105,25 @@ public class LogUtils {
         }
     }
 
-    private static void appendSqlWithInlineIndexedParams(StringBuffer sb, String sql, TreeMap<Integer,Object> parameters) {
+    private static void appendSqlWithInlineIndexedParams(StringBuilder sb, String sql, TreeMap<Integer,Object> parameters) {
 
         if (sql != null) {
             int questionMarkCount = 1;
             Pattern p = Pattern.compile("\\?");
             Matcher m = p.matcher(sql);
-            StringBuffer stringBuffer = new StringBuffer();
+            StringBuffer sqlStringBuffer = new StringBuffer();
 
             while (m.find()) {
-                m.appendReplacement(stringBuffer, ConfigurationParameters.rdbmsSpecifics.formatParameter(parameters.get(questionMarkCount)));
+                m.appendReplacement(sqlStringBuffer, ConfigurationParameters.rdbmsSpecifics.formatParameter(parameters.get(questionMarkCount)));
                 questionMarkCount++;
             }
-            sql = String.valueOf(m.appendTail(stringBuffer));
+            m.appendTail(sqlStringBuffer);
 
-            sb.append(sql).append(";");
+            sb.append(sqlStringBuffer).append(";");
         }
     }
 
-    private static void appendSqlWithInlineNamedParams(StringBuffer sb, String sql, TreeMap<String,Object> namedParameters) {
+    private static void appendSqlWithInlineNamedParams(StringBuilder sb, String sql, TreeMap<String,Object> namedParameters) {
         if (sql != null) {
             if (namedParameters != null && !namedParameters.isEmpty()) {
                 for (Entry<String, Object> entry : namedParameters.entrySet()) {
@@ -118,7 +139,7 @@ public class LogUtils {
         if (!ConfigurationParameters.printStackTrace)
             return "";
         StackTraceElement stackTraces[] = new Throwable().getStackTrace();
-        StringBuffer sb = new StringBuffer(" at ");
+        StringBuilder sb = new StringBuilder(" at ");
         sb.append(stackTraces[4]);
         return sb.toString();
     }

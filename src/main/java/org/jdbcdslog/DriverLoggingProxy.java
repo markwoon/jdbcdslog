@@ -36,7 +36,7 @@ public class DriverLoggingProxy implements Driver {
 
     public Connection connect(String url, Properties info) throws SQLException {
         if (ConnectionLogger.isInfoEnabled()) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append("connect to URL ").append(url).append(" with properties: ").append(info.toString());
             ConnectionLogger.info(sb.toString());
         }
