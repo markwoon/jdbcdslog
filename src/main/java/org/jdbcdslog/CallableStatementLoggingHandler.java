@@ -9,12 +9,11 @@ import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.util.TreeMap;
 
-@SuppressWarnings({ "unchecked", "rawtypes" })
 public class CallableStatementLoggingHandler extends PreparedStatementLoggingHandler implements InvocationHandler {
 
-    static Logger logger = LoggerFactory.getLogger(CallableStatementLoggingHandler.class);
+    protected static Logger logger = LoggerFactory.getLogger(CallableStatementLoggingHandler.class);
 
-    TreeMap namedParameters = new TreeMap();
+    protected TreeMap<String, Object> namedParameters = new TreeMap<String, Object>();
 
     public CallableStatementLoggingHandler(CallableStatement ps, String sql) {
         super(ps, sql);
@@ -26,20 +25,27 @@ public class CallableStatementLoggingHandler extends PreparedStatementLoggingHan
 
         Object r = null;
         try {
-            boolean toLog = (StatementLogger.isInfoEnabled() || SlowQueryLogger.isInfoEnabled()) && executeMethods.contains(method.getName());
+            boolean toLog = (StatementLogger.isInfoEnabled() || SlowQueryLogger.isInfoEnabled()) && EXECUTE_METHODS.contains(method.getName());
             long t1 = 0;
-            if (toLog)
+            if (toLog) {
                 t1 = System.nanoTime();
+            }
+
             logger.debug(methodName + "before method call..");
             r = method.invoke(target, args);
             logger.debug(methodName + "after method call. result = {}", r);
 
-            if (setMethods.contains(method.getName()) && args[0] instanceof Integer)
-                parameters.put(args[0], args[1]);
-            if (setMethods.contains(method.getName()) && args[0] instanceof String)
-                namedParameters.put(args[0], args[1]);
-            if ("clearParameters".equals(method.getName()))
-                parameters = new TreeMap();
+            if (SET_METHODS.contains(method.getName())) {
+                 if (args[0] instanceof Integer) {
+                     parameters.put((Integer)args[0], args[1]);
+                 } else if (args[0] instanceof String) {
+                     namedParameters.put((String)args[0], args[1]);
+                 }
+            }
+            if ("clearParameters".equals(method.getName())) {
+                parameters.clear();
+                namedParameters.clear();
+            }
             if (toLog) {
                 long t2 = System.nanoTime();
                 long time = t2 - t1;

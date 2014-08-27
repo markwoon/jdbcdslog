@@ -27,7 +27,7 @@ public class SqlServerRdbmsSpecifics implements RdbmsSpecifics {
             // handle sql server sql statment's special characters,like '
 
             // TODO handle other special characters which i don't know.
-            // TODO it has not enought actual test,maybe has some issues,if you use it,please help check it is ok? Thanks.
+            // TODO it has not enough actual test,maybe has some issues,if you use it,please help check it is ok? Thanks.
             // TODO only handle % and _ when use like statment. later processing.
 
             return "'" + text + "'";

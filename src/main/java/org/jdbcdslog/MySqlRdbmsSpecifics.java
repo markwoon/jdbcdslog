@@ -27,7 +27,7 @@ public class MySqlRdbmsSpecifics implements RdbmsSpecifics {
             // handle Matcher's appendReplacement method special characters: \ and $
             // handle mysql sql statment's special characters,like ' and " and \ and \r,\n,\t
 
-            // TODO only handle % and _ when use like statment. later processing.
+            // TODO only handle % and _ when use like statement. later processing.
 
             return "'" + text + "'";
         } else if (object instanceof Timestamp) {

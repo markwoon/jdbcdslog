@@ -5,13 +5,13 @@ import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class StatementLoggingHandler implements InvocationHandler {
-    Object targetStatement = null;
+    protected Object targetStatement = null;
 
-    @SuppressWarnings("rawtypes")
-    static List executeMethods = Arrays.asList(new String[] { "addBatch", "execute", "executeQuery", "executeUpdate" });
+    protected final static Set<String> EXECUTE_METHODS = new HashSet<String>(Arrays.asList("addBatch", "execute", "executeQuery", "executeUpdate"));
 
     public StatementLoggingHandler(Statement statement) {
         targetStatement = statement;
@@ -20,7 +20,7 @@ public class StatementLoggingHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Object r = null;
         try {
-            boolean toLog = (StatementLogger.isInfoEnabled() || SlowQueryLogger.isInfoEnabled()) && executeMethods.contains(method.getName());
+            boolean toLog = (StatementLogger.isInfoEnabled() || SlowQueryLogger.isInfoEnabled()) && EXECUTE_METHODS.contains(method.getName());
             long t1 = 0;
             if (toLog)
                 t1 = System.nanoTime();

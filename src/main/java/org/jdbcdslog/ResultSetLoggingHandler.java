@@ -7,7 +7,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 
 public class ResultSetLoggingHandler implements InvocationHandler {
-    Object target = null;
+    private ResultSet target = null;
+    private int resultCount = 0;
 
     public ResultSetLoggingHandler(ResultSet target) {
         this.target = target;
@@ -22,19 +23,30 @@ public class ResultSetLoggingHandler implements InvocationHandler {
         } catch (Throwable e) {
             LogUtils.handleException(e, ResultSetLogger.getLogger(), LogUtils.createLogEntry(method, null, null, null));
         }
-        if (ResultSetLogger.isInfoEnabled() && method.getName().equals("next") && ((Boolean) r).booleanValue()) {
+        if (ResultSetLogger.isInfoEnabled() && method.getName().equals("next")) {
             long t2 = System.nanoTime();
             long time = t2 - t1;
 
             String fullMethodName = method.getDeclaringClass().getName() + "." + method.getName();
-            ResultSet rs = (ResultSet) target;
-            ResultSetMetaData md = rs.getMetaData();
-            StringBuffer s = new StringBuffer(fullMethodName).append(" {");
-            if (md.getColumnCount() > 0)
-                s.append(ConfigurationParameters.rdbmsSpecifics.formatParameter(rs.getObject(1)));
-            for (int i = 2; i <= md.getColumnCount(); i++)
-                s.append(", ").append(ConfigurationParameters.rdbmsSpecifics.formatParameter(rs.getObject(i)));
-            s.append("}");
+            ResultSetMetaData md = target.getMetaData();
+            StringBuffer s = new StringBuffer(fullMethodName);
+
+            if ((Boolean) r) {
+                s.append(" {");
+                if (md.getColumnCount() > 0) {
+                    s.append(ConfigurationParameters.rdbmsSpecifics.formatParameter(target.getObject(1)));
+                }
+                for (int i = 2; i <= md.getColumnCount(); i++) {
+                    s.append(", ").append(ConfigurationParameters.rdbmsSpecifics.formatParameter(target.getObject(i)));
+                }
+                s.append("}")
+                    .append(" result count : ")
+                    .append(++resultCount);
+            } else {
+                s.append(" Total Results ").append(resultCount);
+            }
+
+
             if (ConfigurationParameters.showTime) {
                 s.append(" ").append(String.format("%.9f", time/1000000000.0)).append(" s.");
             }
