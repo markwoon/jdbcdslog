@@ -5,12 +5,12 @@
         <artifactId>oss-parent</artifactId>
         <version>7</version>
     </parent>
-    <groupId>com.googlecode.usc</groupId>
-    <artifactId>jdbcdslog</artifactId>
-    <version>1.0.6.3-SNAPSHOT</version>
+    <groupId>jdbcdslog-exp2</groupId>
+    <artifactId>jdbcdslog-exp2</artifactId>
+    <version>2.0-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>jdbcdslog</name>
-    <url>http://code.google.com/p/jdbcdslog-exp/</url>
+    <name>JDBC DS Log - EXP v2</name>
+    <url>https://github.com/adrianshum/jdbcdslog/</url>
 
     <licenses>
         <license>
@@ -20,13 +20,13 @@
     </licenses>
 
     <scm>
-        <connection>scm:svn:http://jdbcdslog-exp.googlecode.com/svn/trunk/</connection>
-        <developerConnection>scm:svn:https://jdbcdslog-exp.googlecode.com/svn/trunk/</developerConnection>
-        <url>http://jdbcdslog-exp.googlecode.com/svn/trunk/</url>
+        <connection>scm:git:https://github.com/adrianshum/jdbcdslog.git</connection>
+        <developerConnection>scm:git:https://github.com/adrianshum/jdbcdslog.git</developerConnection>
+        <url>https://github.com/adrianshum/jdbcdslog</url>
     </scm>
 
     <issueManagement>
-        <url>http://code.google.com/p/jdbcdslog-exp/issues/list</url>
+        <url>https://github.com/adrianshum/jdbcdslog/issues</url>
     </issueManagement>
 
     <developers>
@@ -52,11 +52,18 @@
                 <role>Owner</role>
             </roles>
         </developer>
+        <developer>
+            <name>Adrian Shum</name>
+            <id>adrianshum</id>
+            <timezone>+8</timezone>
+            <roles>
+                <role>Owner</role>
+            </roles>
+        </developer>
     </developers>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <JAVA_1_5_HOME>C:\Progra~1\Java\jdk1.5.0_22</JAVA_1_5_HOME>
     </properties>
 
     <dependencies>
@@ -125,11 +132,10 @@
                     <target>1.5</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
                     <fork>true</fork>
-                    <executable>${JAVA_1_5_HOME}/bin/javac</executable>
                     <compilerVersion>1.5</compilerVersion>
                 </configuration>
             </plugin>
-
+<!--
             <plugin>
                 <artifactId>maven-release-plugin</artifactId>
                 <version>2.0-beta-9</version>
@@ -139,6 +145,7 @@
                     <mavenExecutorId>forked-path</mavenExecutorId>
                 </configuration>
             </plugin>
+ -->
         </plugins>
     </build>
 
