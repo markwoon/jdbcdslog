@@ -1,5 +1,7 @@
 package org.jdbcdslog;
 
+import static org.jdbcdslog.Loggers.connectionLogger;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -35,7 +37,7 @@ public class GenericLoggingHandler implements InvocationHandler {
             }
             return r;
         } catch (Throwable t) {
-            LogUtils.handleException(t, ConnectionLogger.getLogger(), LogUtils.createLogEntry(method, null, null, null));
+            LogUtils.handleException(t, connectionLogger, LogUtils.createLogEntry(method, null, null, null));
         }
         return null;
     }
@@ -43,12 +45,9 @@ public class GenericLoggingHandler implements InvocationHandler {
     private Object wrap(Object r, String sql) throws Exception {
         if (r instanceof Connection) {
             Connection con = (Connection) r;
-            if (ConnectionLogger.isInfoEnabled()) {
-                StringBuilder sb = new StringBuilder("connect to URL ").append( con.getMetaData().getURL())
-                                            .append(" for user ").append(con.getMetaData().getUserName());
-                LogUtils.appendStackTrace(sb);
-                ConnectionLogger.info(sb.toString());
-
+            if (connectionLogger.isInfoEnabled()) {
+                String message = LogUtils.appendStackTrace("connect to URL {} for user {}");
+                connectionLogger.info(message, con.getMetaData().getURL(), con.getMetaData().getUserName());
             }
             return wrapByGenericProxy(r, Connection.class, sql);
         } else if (r instanceof CallableStatement) {

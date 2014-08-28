@@ -18,15 +18,11 @@ public class LogUtils {
 
     public static void handleException(Throwable e, Logger l, StringBuilder msg) throws Throwable {
         if (e instanceof InvocationTargetException) {
-            Throwable t = ((InvocationTargetException) e).getTargetException();
-            if (l.isErrorEnabled())
-                l.error(msg + "\nthrows exception: " + t.getClass().getName() + ": " + t.getMessage(), t);
-            throw t;
-        } else {
-            if (l.isErrorEnabled())
-                l.error(msg + "\nthrows exception: " + e.getClass().getName() + ": " + e.getMessage(), e);
-            throw e;
+            e = ((InvocationTargetException) e).getTargetException();
         }
+
+        l.error(msg.toString(), e);
+        throw e;
     }
 
     /**
@@ -44,6 +40,13 @@ public class LogUtils {
 
     }
 
+    public static String appendStackTrace(String message) {
+        if (ConfigurationParameters.printStackTrace) {
+            return appendStackTrace(new StringBuilder(message)).toString();
+        } else {
+            return message;
+        }
+    }
 
     public static StringBuilder appendStackTrace(StringBuilder sb) {
         if (ConfigurationParameters.printStackTrace) {
@@ -162,15 +165,6 @@ public class LogUtils {
         }
 
     }
-//
-//    public static String getStackTrace() {
-//        if (!ConfigurationParameters.printStackTrace)
-//            return "";
-//        StackTraceElement stackTraces[] = new Throwable().getStackTrace();
-//        StringBuilder sb = new StringBuilder(" at ");
-//        sb.append(stackTraces[4]);
-//        return sb.toString();
-//    }
 
     // Refer apache common lang StringUtils.
     public static String replaceEach(String text, String[] searchList, String[] replacementList) {

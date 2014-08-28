@@ -1,5 +1,7 @@
 package org.jdbcdslog;
 
+import static org.jdbcdslog.Loggers.statementLogger;
+import static org.jdbcdslog.Loggers.slowQueryLogger;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.sql.ResultSet;
@@ -8,10 +10,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class StatementLoggingHandler implements InvocationHandler {
-    protected Object targetStatement = null;
 
+public class StatementLoggingHandler implements InvocationHandler {
     protected final static Set<String> EXECUTE_METHODS = new HashSet<String>(Arrays.asList("addBatch", "execute", "executeQuery", "executeUpdate"));
+
+    protected Object targetStatement = null;
 
     public StatementLoggingHandler(Statement statement) {
         targetStatement = statement;
@@ -20,7 +23,7 @@ public class StatementLoggingHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Object r = null;
         try {
-            boolean toLog = (StatementLogger.isInfoEnabled() || SlowQueryLogger.isInfoEnabled()) && EXECUTE_METHODS.contains(method.getName());
+            boolean toLog = (statementLogger.isInfoEnabled() || slowQueryLogger.isInfoEnabled()) && EXECUTE_METHODS.contains(method.getName());
             long t1 = 0;
             if (toLog)
                 t1 = System.nanoTime();
@@ -36,15 +39,15 @@ public class StatementLoggingHandler implements InvocationHandler {
                 LogUtils.appendStackTrace(sb);
                 LogUtils.appendElapsedTime(sb, time);
 
-                StatementLogger.info(sb.toString());
+                statementLogger.info(sb.toString());
 
                 if (time/1000000 >= ConfigurationParameters.slowQueryThreshold) {
-                    SlowQueryLogger.info(sb.toString());
+                    slowQueryLogger.info(sb.toString());
                 }
 
             }
         } catch (Throwable t) {
-            LogUtils.handleException(t, StatementLogger.getLogger(), LogUtils.createLogEntry(method, args[0].toString(), null, null));
+            LogUtils.handleException(t, statementLogger, LogUtils.createLogEntry(method, args[0].toString(), null, null));
         }
         return r;
     }

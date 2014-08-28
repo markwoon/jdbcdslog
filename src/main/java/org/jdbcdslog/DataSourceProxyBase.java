@@ -1,5 +1,7 @@
 package org.jdbcdslog;
 
+import static org.jdbcdslog.Loggers.connectionLogger;
+
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -37,36 +39,36 @@ public class DataSourceProxyBase implements Serializable {
 
     public Connection getConnection() throws SQLException {
 
-        if (targetDs == null)
+        if (targetDs == null) {
             throw new SQLException("targetDS parameter has not been passed to Database or URL property.");
+        }
         if (targetDs instanceof DataSource) {
             Connection con = ((DataSource) targetDs).getConnection();
-            if (ConnectionLogger.isInfoEnabled()) {
-                StringBuilder sb = new StringBuilder("connect to URL ").append( con.getMetaData().getURL())
-                                                    .append(" for user ").append(con.getMetaData().getUserName());
-                LogUtils.appendStackTrace(sb);
-                ConnectionLogger.info(sb.toString());
+            if (connectionLogger.isInfoEnabled()) {
+                String message = LogUtils.appendStackTrace("connect to URL {} for user {}");
+                connectionLogger.info(message, con.getMetaData().getURL(), con.getMetaData().getUserName());
             }
             return ConnectionLoggingProxy.wrap(con);
-        } else
+        } else {
             throw new SQLException("targetDS doesn't implement DataSource interface.");
+        }
     }
 
     public Connection getConnection(String username, String password) throws SQLException {
-        if (targetDs == null)
+        if (targetDs == null) {
             throw new SQLException("targetDS parameter has not been passed to Database or URL property.");
+        }
         if (targetDs instanceof DataSource) {
             Connection con = ((DataSource) targetDs).getConnection(username, password);
-            if (ConnectionLogger.isInfoEnabled()) {
-                StringBuilder sb = new StringBuilder("connect to URL ").append( con.getMetaData().getURL())
-                        .append(" for user ").append(con.getMetaData().getUserName());
-                LogUtils.appendStackTrace(sb);
-                ConnectionLogger.info(sb.toString());
 
+            if (connectionLogger.isInfoEnabled()) {
+                String message = LogUtils.appendStackTrace("connect to URL {} for user {}");
+                connectionLogger.info(message, con.getMetaData().getURL(), con.getMetaData().getUserName());
             }
             return ConnectionLoggingProxy.wrap(con);
-        } else
+        } else {
             throw new SQLException("targetDS doesn't implement DataSource interface.");
+        }
     }
 
     public PrintWriter getLogWriter() throws SQLException {
@@ -110,13 +112,15 @@ public class DataSourceProxyBase implements Serializable {
     }
 
     public XAConnection getXAConnection() throws SQLException {
-        if (targetDs == null)
+        if (targetDs == null) {
             throw new SQLException("targetDS parameter has not been passed to Database or URL property.");
+        }
         if (targetDs instanceof XADataSource) {
             XAConnection con = ((XADataSource) targetDs).getXAConnection();
             return XAConnectionLoggingProxy.wrap(con);
-        } else
+        } else {
             throw new SQLException("targetDS doesn't implement XADataSource interface.");
+        }
     }
 
     public XAConnection getXAConnection(String user, String password) throws SQLException {
@@ -146,20 +150,19 @@ public class DataSourceProxyBase implements Serializable {
             throw new SQLException("targetDS doesn't implement ConnectionPoolDataSource interface.");
     }
 
-    void invokeTargetSetMethod(String m, Object p, Class<?> c) {
-        // String methodName = "invokeTargetSetMethod() ";
+    protected void invokeTargetSetMethod(String methodName, Object param, Class<?> paramClass) {
         if (targetDs == null) {
-            props.put(m, p);
-            propClasses.put(m, c);
+            props.put(methodName, param);
+            propClasses.put(methodName, paramClass);
             return;
         }
-        logger.debug(m + "(" + p.toString() + ")");
+        logger.debug("invokeTargetSetMethod: {} ({})", methodName, param);
         try {
-            Method me = targetDs.getClass().getMethod(m, c);
+            Method me = targetDs.getClass().getMethod(methodName, paramClass);
             if (me != null)
-                me.invoke(targetDs, p);
+                me.invoke(targetDs, param);
         } catch (Exception e) {
-            ConnectionLogger.error(e.getMessage(), e);
+            connectionLogger.error("Error in invoking setter method {}({})", methodName, param, e);
         }
     }
 
@@ -169,17 +172,16 @@ public class DataSourceProxyBase implements Serializable {
     }
 
     private String initTargetDS(String url) throws JDBCDSLogException {
-        String methodName = "initTargedDS() ";
-        logger.debug(methodName + "url = " + url + " targedDS = " + targetDs);
+        logger.debug("initTargetDS: url={}, targetDs={}", url, targetDs);
         try {
             if (url == null || targetDs != null)
                 return url;
-            logger.debug("Parse url.");
+            logger.debug("Parse url. {}", url);
             StringTokenizer ts = new StringTokenizer(url, ":/;=&?", false);
             String targetDSName = null;
             while (ts.hasMoreTokens()) {
                 String s = ts.nextToken();
-                logger.debug("s = " + s);
+                logger.debug("s = {}", s);
                 if (TARGET_DS_PARAMETER.equals(s) && ts.hasMoreTokens()) {
                     targetDSName = ts.nextToken();
                     break;
@@ -191,29 +193,27 @@ public class DataSourceProxyBase implements Serializable {
             setTargetDS(targetDSName);
             return url;
         } catch (Throwable t) {
-            ConnectionLogger.error(t.getMessage(), t);
+            connectionLogger.error("Error in initTargetDS() url={}", url, t);
             throw new JDBCDSLogException(t);
         }
     }
 
     public void setTargetDSDirect(Object dataSource) {
-        String methodName = "setTargetDSDirect() ";
         targetDs = dataSource;
-        logger.debug(methodName + "targetDS initialized.");
+        logger.debug("setTargetDSDirect(): targetDS initialized.");
     }
 
     public void setTargetDS(String targetDSName) throws JDBCDSLogException, InstantiationException, IllegalAccessException {
-        String methodName = "setTargetDS() ";
         try {
             Class<?> cl = Class.forName(targetDSName);
             if (cl == null)
                 throw new JDBCDSLogException("Can't load class of targetDS.");
             Object targetObj = cl.newInstance();
             targetDs = targetObj;
-            logger.debug(methodName + "targetDS initialized.");
+            logger.debug("setTargetDS(): targetDS initialized.");
             setPropertiesForTargetDS();
         } catch (Throwable t) {
-            ConnectionLogger.error(t.getMessage(), t);
+            connectionLogger.error("Error in setTargetDS(): targetDSName={}", targetDSName, t);
             throw new JDBCDSLogException(t);
         }
     }

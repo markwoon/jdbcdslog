@@ -1,5 +1,7 @@
 package org.jdbcdslog;
 
+import static org.jdbcdslog.Loggers.resultSetLogger;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -22,9 +24,9 @@ public class ResultSetLoggingHandler implements InvocationHandler {
         try {
             r = method.invoke(target, args);
         } catch (Throwable e) {
-            LogUtils.handleException(e, ResultSetLogger.getLogger(), LogUtils.createLogEntry(method, null, null, null));
+            LogUtils.handleException(e, resultSetLogger, LogUtils.createLogEntry(method, null, null, null));
         }
-        if (ResultSetLogger.isInfoEnabled() && method.getName().equals("next")) {
+        if (resultSetLogger.isInfoEnabled() && method.getName().equals("next")) {
             long t2 = System.nanoTime();
             long time = t2 - t1;
             totalFetchTime += time;
@@ -54,7 +56,7 @@ public class ResultSetLoggingHandler implements InvocationHandler {
             LogUtils.appendStackTrace(sb);
             LogUtils.appendElapsedTime(sb, time);
 
-            ResultSetLogger.info(sb.toString());
+            resultSetLogger.info(sb.toString());
         }
         return r;
     }

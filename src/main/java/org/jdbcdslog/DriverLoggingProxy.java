@@ -1,5 +1,7 @@
 package org.jdbcdslog;
 
+import static org.jdbcdslog.Loggers.connectionLogger;
+
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -23,7 +25,7 @@ public class DriverLoggingProxy implements Driver {
         try {
             DriverManager.registerDriver(new DriverLoggingProxy());
         } catch (Exception exception) {
-            ConnectionLogger.error(exception.getMessage(), exception);
+            connectionLogger.error("Error in registering driver", exception);
         }
     }
 
@@ -35,14 +37,13 @@ public class DriverLoggingProxy implements Driver {
     }
 
     public Connection connect(String url, Properties info) throws SQLException {
-        if (ConnectionLogger.isInfoEnabled()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("connect to URL ").append(url).append(" with properties: ").append(info.toString());
-            LogUtils.appendStackTrace(sb);
-            ConnectionLogger.info(sb.toString());
+        if (connectionLogger.isInfoEnabled()) {
+            String message = LogUtils.appendStackTrace("connect to URL {} with properties: {}");
+            connectionLogger.info(message, url, info);
         }
-        if (!acceptsURL(url))
+        if (!acceptsURL(url)) {
             throw new SQLException("Invalid URL" + url);
+        }
         url = "jdbc:" + url.substring(urlPrefix.length());
         StringTokenizer ts = new StringTokenizer(url, ":/;=&?", false);
         String targetDriver = null;
@@ -54,14 +55,16 @@ public class DriverLoggingProxy implements Driver {
                 break;
             }
         }
-        if (targetDriver == null)
+        if (targetDriver == null) {
             throw new SQLException("Can't find targetDriver parameter in URL: " + url);
+        }
         url = url.substring(0, url.length() - targetDriver.length() - targetDriverParameter.length() - 2);
         try {
             Class.forName(targetDriver);
             return ConnectionLoggingProxy.wrap(DriverManager.getConnection(url, info));
         } catch (Exception e) {
-            ConnectionLogger.error(e.getMessage(), e);
+            connectionLogger.error("Error in getting connection for targetDriver {}, for url {} with properties: {}",
+                                        targetDriver, url, info, e);
             throw new SQLException(e.getMessage());
         }
     }

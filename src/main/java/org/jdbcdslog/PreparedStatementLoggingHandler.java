@@ -1,5 +1,8 @@
 package org.jdbcdslog;
 
+import static org.jdbcdslog.Loggers.statementLogger;
+import static org.jdbcdslog.Loggers.slowQueryLogger;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
@@ -34,7 +37,7 @@ public class PreparedStatementLoggingHandler implements InvocationHandler {
         Object r = null;
         try {
             long t1 = 0;
-            boolean toLog = (StatementLogger.isInfoEnabled() || SlowQueryLogger.isInfoEnabled()) && EXECUTE_METHODS.contains(method.getName());
+            boolean toLog = (statementLogger.isInfoEnabled() || slowQueryLogger.isInfoEnabled()) && EXECUTE_METHODS.contains(method.getName());
             if (toLog) {
                 t1 = System.nanoTime();
             }
@@ -56,16 +59,16 @@ public class PreparedStatementLoggingHandler implements InvocationHandler {
                 LogUtils.appendStackTrace(sb);
                 LogUtils.appendElapsedTime(sb, time);
 
-                StatementLogger.info(sb.toString());
+                statementLogger.info(sb.toString());
 
                 if (time/1000000 >= ConfigurationParameters.slowQueryThreshold) {
-                    SlowQueryLogger.info(sb.toString());
+                    slowQueryLogger.info(sb.toString());
                 }
             }
             if (r instanceof ResultSet)
                 r = ResultSetLoggingHandler.wrapByResultSetProxy((ResultSet) r);
         } catch (Throwable t) {
-            LogUtils.handleException(t, StatementLogger.getLogger(), LogUtils.createLogEntry(method, sql, parameters, null));
+            LogUtils.handleException(t, statementLogger, LogUtils.createLogEntry(method, sql, parameters, null));
         }
         return r;
     }
