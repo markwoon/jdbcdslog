@@ -9,6 +9,7 @@ import java.sql.ResultSetMetaData;
 public class ResultSetLoggingHandler implements InvocationHandler {
     private ResultSet target = null;
     private int resultCount = 0;
+    private long totalFetchTime = 0;
 
     public ResultSetLoggingHandler(ResultSet target) {
         this.target = target;
@@ -26,6 +27,7 @@ public class ResultSetLoggingHandler implements InvocationHandler {
         if (ResultSetLogger.isInfoEnabled() && method.getName().equals("next")) {
             long t2 = System.nanoTime();
             long time = t2 - t1;
+            totalFetchTime += time;
 
             String fullMethodName = method.getDeclaringClass().getName() + "." + method.getName();
             ResultSetMetaData md = target.getMetaData();
@@ -40,10 +42,12 @@ public class ResultSetLoggingHandler implements InvocationHandler {
                     s.append(", ").append(ConfigurationParameters.rdbmsSpecifics.formatParameter(target.getObject(i)));
                 }
                 s.append("}")
-                    .append(" result count : ")
+                    .append(" Row Number : ")
                     .append(++resultCount);
             } else {
-                s.append(" Total Results ").append(resultCount);
+                s.append(" Total Results ").append(resultCount)
+                        .append(".  Total fetch time: ").append(String.format("%.9f", totalFetchTime/1000000000.0)).append(" s.");
+                totalFetchTime = 0;
             }
 
             LogUtils.appendElapsedTime(s, time);
