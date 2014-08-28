@@ -38,6 +38,7 @@ public class DriverLoggingProxy implements Driver {
         if (ConnectionLogger.isInfoEnabled()) {
             StringBuilder sb = new StringBuilder();
             sb.append("connect to URL ").append(url).append(" with properties: ").append(info.toString());
+            LogUtils.appendStackTrace(sb);
             ConnectionLogger.info(sb.toString());
         }
         if (!acceptsURL(url))

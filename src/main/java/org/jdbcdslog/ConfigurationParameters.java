@@ -16,6 +16,8 @@ public class ConfigurationParameters {
     static boolean logText = false;
     static Boolean showTime = false;
     static boolean printStackTrace = false;
+    static boolean printFullStackTrace = false;
+    static String printStackTracePattern = null;
     static boolean inlineQueryParams = true;
     static RdbmsSpecifics rdbmsSpecifics = new OracleRdbmsSpecifics(); // oracle is default db.
 
@@ -32,6 +34,8 @@ public class ConfigurationParameters {
             initSlowQueryThreshold();
             initLogText();
             initPrintStackTrace();
+            initPrintFullStackTrace();
+            initPrintStackTracePattern();
             initShowTime();
             initInlineQueryParams();
             initRdbmsSpecifics();
@@ -67,11 +71,21 @@ public class ConfigurationParameters {
     }
 
     private static void initPrintStackTrace() {
-        String sprintStackTrace = props.getProperty("jdbcdslog.printStackTrace", "false");
-        if ("true".equalsIgnoreCase(sprintStackTrace)) {
+        String sPrintStackTrace = props.getProperty("jdbcdslog.printStackTrace", "false");
+        if ("true".equalsIgnoreCase(sPrintStackTrace)) {
             printStackTrace = true;
         }
     }
+
+    private static void initPrintFullStackTrace() {
+        String sPrintFullStackTrace = props.getProperty("jdbcdslog.printFullStackTrace", "false");
+        printFullStackTrace = "true".equalsIgnoreCase(sPrintFullStackTrace);
+    }
+
+    private static void initPrintStackTracePattern() {
+        printStackTracePattern = props.getProperty("jdbcdslog.printStackTracePattern", "");
+    }
+
 
     private static void initShowTime() {
         String isShowTime = props.getProperty("jdbcdslog.showTime", "false");

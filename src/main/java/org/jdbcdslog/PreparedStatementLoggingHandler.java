@@ -53,6 +53,7 @@ public class PreparedStatementLoggingHandler implements InvocationHandler {
                 long t2 = System.nanoTime();
                 long time = t2 - t1;
 
+                LogUtils.appendStackTrace(sb);
                 LogUtils.appendElapsedTime(sb, time);
 
                 StatementLogger.info(sb.toString());

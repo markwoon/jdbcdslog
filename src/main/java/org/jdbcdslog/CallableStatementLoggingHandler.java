@@ -50,14 +50,15 @@ public class CallableStatementLoggingHandler extends PreparedStatementLoggingHan
                 long t2 = System.nanoTime();
                 long time = t2 - t1;
 
-                StringBuilder s = LogUtils.createLogEntry(method, sql, parameters, namedParameters);
+                StringBuilder sb = LogUtils.createLogEntry(method, sql, parameters, namedParameters);
 
-                LogUtils.appendElapsedTime(s, time);
+                LogUtils.appendStackTrace(sb);
+                LogUtils.appendElapsedTime(sb, time);
 
-                StatementLogger.info(s.toString());
+                StatementLogger.info(sb.toString());
 
                 if (time/1000000 >= ConfigurationParameters.slowQueryThreshold) {
-                    SlowQueryLogger.info(s.toString());
+                    SlowQueryLogger.info(sb.toString());
                 }
             }
             if (r instanceof ResultSet)

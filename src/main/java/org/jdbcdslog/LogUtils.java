@@ -46,15 +46,43 @@ public class LogUtils {
 
 
     public static StringBuilder appendStackTrace(StringBuilder sb) {
-        if (!ConfigurationParameters.printStackTrace) {
-            return sb;
+        if (ConfigurationParameters.printStackTrace) {
+            StackTraceElement[] stackTraces = new Throwable().getStackTrace();
+            int firstNonJdbcDsLogStackIndex = firstNonJdbcDsLogStackIndex(stackTraces);
+
+            if (ConfigurationParameters.printFullStackTrace) {
+                for (int i = firstNonJdbcDsLogStackIndex; i < stackTraces.length; ++i) {
+                    sb.append("\nat ").append(stackTraces[i]);
+                }
+            } else if (ConfigurationParameters.printStackTracePattern.length() == 0) {
+                sb.append("\nat ").append(stackTraces[firstNonJdbcDsLogStackIndex]);
+            } else {   // pattern provided
+                String matchPattern =  ConfigurationParameters.printStackTracePattern;
+                for (StackTraceElement stackTraceElement : stackTraces) {
+                    if ( stackTraceElement.getClassName().matches(matchPattern)){
+                        sb.append("\nat ").append(stackTraceElement);
+                        break;
+                    }
+                }
+            }
         }
 
-        StackTraceElement stackTraces[] = new Throwable().getStackTrace();
-
-        sb.append("\nat ").append(stackTraces[4]);
-
         return sb;
+    }
+
+    public static int firstNonJdbcDsLogStackIndex(StackTraceElement[] stackTraces) {
+        int i = 0;
+        for (i = 0; i < stackTraces.length; ++i) {
+            if ( ! stackTraces[i].getClassName().startsWith("org.jdbcdslog")) {
+                break;
+            }
+        }
+
+        if (i > 0) {
+            ++i;    // skip one more level for the proxy
+        }
+
+        return i;
     }
 
     public static StringBuilder createLogEntry(Method method, String sql, TreeMap<Integer,Object> parameters, TreeMap<String,Object> namedParameters) {
@@ -134,15 +162,15 @@ public class LogUtils {
         }
 
     }
-
-    public static String getStackTrace() {
-        if (!ConfigurationParameters.printStackTrace)
-            return "";
-        StackTraceElement stackTraces[] = new Throwable().getStackTrace();
-        StringBuilder sb = new StringBuilder(" at ");
-        sb.append(stackTraces[4]);
-        return sb.toString();
-    }
+//
+//    public static String getStackTrace() {
+//        if (!ConfigurationParameters.printStackTrace)
+//            return "";
+//        StackTraceElement stackTraces[] = new Throwable().getStackTrace();
+//        StringBuilder sb = new StringBuilder(" at ");
+//        sb.append(stackTraces[4]);
+//        return sb.toString();
+//    }
 
     // Refer apache common lang StringUtils.
     public static String replaceEach(String text, String[] searchList, String[] replacementList) {

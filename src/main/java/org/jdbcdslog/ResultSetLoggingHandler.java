@@ -17,9 +17,9 @@ public class ResultSetLoggingHandler implements InvocationHandler {
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Object r = null;
-        long t1 = 0;
+        long t1 = System.nanoTime();
+
         try {
-            t1 = System.nanoTime();
             r = method.invoke(target, args);
         } catch (Throwable e) {
             LogUtils.handleException(e, ResultSetLogger.getLogger(), LogUtils.createLogEntry(method, null, null, null));
@@ -31,28 +31,30 @@ public class ResultSetLoggingHandler implements InvocationHandler {
 
             String fullMethodName = method.getDeclaringClass().getName() + "." + method.getName();
             ResultSetMetaData md = target.getMetaData();
-            StringBuilder s = new StringBuilder(fullMethodName);
+            StringBuilder sb = new StringBuilder(fullMethodName).append(": ");
 
             if ((Boolean) r) {
-                s.append(" {");
+                sb.append(" {");
                 if (md.getColumnCount() > 0) {
-                    s.append(ConfigurationParameters.rdbmsSpecifics.formatParameter(target.getObject(1)));
+                    sb.append(ConfigurationParameters.rdbmsSpecifics.formatParameter(target.getObject(1)));
                 }
                 for (int i = 2; i <= md.getColumnCount(); i++) {
-                    s.append(", ").append(ConfigurationParameters.rdbmsSpecifics.formatParameter(target.getObject(i)));
+                    sb.append(", ").append(ConfigurationParameters.rdbmsSpecifics.formatParameter(target.getObject(i)));
                 }
-                s.append("}")
-                    .append(" Row Number : ")
+                sb.append("}")
+                    .append(" Row Number: ")
                     .append(++resultCount);
+
             } else {
-                s.append(" Total Results ").append(resultCount)
+                sb.append(" Total Results: ").append(resultCount)
                         .append(".  Total fetch time: ").append(String.format("%.9f", totalFetchTime/1000000000.0)).append(" s.");
                 totalFetchTime = 0;
             }
 
-            LogUtils.appendElapsedTime(s, time);
+            LogUtils.appendStackTrace(sb);
+            LogUtils.appendElapsedTime(sb, time);
 
-            ResultSetLogger.info(s.toString());
+            ResultSetLogger.info(sb.toString());
         }
         return r;
     }

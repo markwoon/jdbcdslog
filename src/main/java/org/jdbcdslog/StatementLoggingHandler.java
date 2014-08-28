@@ -33,6 +33,7 @@ public class StatementLoggingHandler implements InvocationHandler {
 
                 StringBuilder sb = LogUtils.createLogEntry(method, args == null ? null : args[0].toString(), null, null);
 
+                LogUtils.appendStackTrace(sb);
                 LogUtils.appendElapsedTime(sb, time);
 
                 StatementLogger.info(sb.toString());

@@ -41,8 +41,12 @@ public class DataSourceProxyBase implements Serializable {
             throw new SQLException("targetDS parameter has not been passed to Database or URL property.");
         if (targetDs instanceof DataSource) {
             Connection con = ((DataSource) targetDs).getConnection();
-            if (ConnectionLogger.isInfoEnabled())
-                ConnectionLogger.info("connect to URL " + con.getMetaData().getURL() + " for user " + con.getMetaData().getUserName());
+            if (ConnectionLogger.isInfoEnabled()) {
+                StringBuilder sb = new StringBuilder("connect to URL ").append( con.getMetaData().getURL())
+                                                    .append(" for user ").append(con.getMetaData().getUserName());
+                LogUtils.appendStackTrace(sb);
+                ConnectionLogger.info(sb.toString());
+            }
             return ConnectionLoggingProxy.wrap(con);
         } else
             throw new SQLException("targetDS doesn't implement DataSource interface.");
@@ -53,8 +57,13 @@ public class DataSourceProxyBase implements Serializable {
             throw new SQLException("targetDS parameter has not been passed to Database or URL property.");
         if (targetDs instanceof DataSource) {
             Connection con = ((DataSource) targetDs).getConnection(username, password);
-            if (ConnectionLogger.isInfoEnabled())
-                ConnectionLogger.info("connect to URL " + con.getMetaData().getURL() + " for user " + con.getMetaData().getUserName());
+            if (ConnectionLogger.isInfoEnabled()) {
+                StringBuilder sb = new StringBuilder("connect to URL ").append( con.getMetaData().getURL())
+                        .append(" for user ").append(con.getMetaData().getUserName());
+                LogUtils.appendStackTrace(sb);
+                ConnectionLogger.info(sb.toString());
+
+            }
             return ConnectionLoggingProxy.wrap(con);
         } else
             throw new SQLException("targetDS doesn't implement DataSource interface.");

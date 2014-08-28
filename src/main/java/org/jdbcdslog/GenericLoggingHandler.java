@@ -43,8 +43,13 @@ public class GenericLoggingHandler implements InvocationHandler {
     private Object wrap(Object r, String sql) throws Exception {
         if (r instanceof Connection) {
             Connection con = (Connection) r;
-            if (ConnectionLogger.isInfoEnabled())
-                ConnectionLogger.info("connect to URL " + con.getMetaData().getURL() + " for user " + con.getMetaData().getUserName());
+            if (ConnectionLogger.isInfoEnabled()) {
+                StringBuilder sb = new StringBuilder("connect to URL ").append( con.getMetaData().getURL())
+                                            .append(" for user ").append(con.getMetaData().getUserName());
+                LogUtils.appendStackTrace(sb);
+                ConnectionLogger.info(sb.toString());
+
+            }
             return wrapByGenericProxy(r, Connection.class, sql);
         } else if (r instanceof CallableStatement) {
             return wrapByCallableStatementProxy(r, sql);
