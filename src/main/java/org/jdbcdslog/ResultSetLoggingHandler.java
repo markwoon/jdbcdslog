@@ -31,32 +31,40 @@ public class ResultSetLoggingHandler implements InvocationHandler {
             long time = t2 - t1;
             totalFetchTime += time;
 
-            String fullMethodName = method.getDeclaringClass().getName() + "." + method.getName();
-            ResultSetMetaData md = target.getMetaData();
-            StringBuilder sb = new StringBuilder(fullMethodName).append(": ");
+            if ((Boolean) r ) {
+                ++resultCount;
+                if (resultSetLogger.isDebugEnabled()) {
 
-            if ((Boolean) r) {
-                sb.append(" {");
-                if (md.getColumnCount() > 0) {
-                    sb.append(ConfigurationParameters.rdbmsSpecifics.formatParameter(target.getObject(1)));
+                    ResultSetMetaData md = target.getMetaData();
+                    StringBuilder sb = new StringBuilder(method.getDeclaringClass().getName()).append(".").append(method.getName()).append(": ");
+
+                    sb.append(" {");
+                    for (int i = 1; i <= md.getColumnCount(); i++) {
+                        if ( i > 1) {
+                            sb.append(", ");
+                        }
+                        sb.append(ConfigurationParameters.rdbmsSpecifics.formatParameter(target.getObject(i)));
+                    }
+                    sb.append("} Row Number: ").append(resultCount);
+
+                    LogUtils.appendStackTrace(sb);
+                    LogUtils.appendElapsedTime(sb, time);
+
+                    resultSetLogger.debug(sb.toString());
                 }
-                for (int i = 2; i <= md.getColumnCount(); i++) {
-                    sb.append(", ").append(ConfigurationParameters.rdbmsSpecifics.formatParameter(target.getObject(i)));
-                }
-                sb.append("}")
-                    .append(" Row Number: ")
-                    .append(++resultCount);
 
             } else {
-                sb.append(" Total Results: ").append(resultCount)
-                        .append(".  Total fetch time: ").append(String.format("%.9f", totalFetchTime/1000000000.0)).append(" s.");
+
+                StringBuilder sb = new StringBuilder(method.getDeclaringClass().getName()).append(".").append(method.getName()).append(": ")
+                                        .append(" Total Results: ").append(resultCount)
+                                        .append(".  Total fetch time: ").append(String.format("%.9f", totalFetchTime/1000000000.0)).append(" s.");
                 totalFetchTime = 0;
+                LogUtils.appendStackTrace(sb);
+                LogUtils.appendElapsedTime(sb, time);
+
+                resultSetLogger.info(sb.toString());
             }
 
-            LogUtils.appendStackTrace(sb);
-            LogUtils.appendElapsedTime(sb, time);
-
-            resultSetLogger.info(sb.toString());
         }
         return r;
     }
