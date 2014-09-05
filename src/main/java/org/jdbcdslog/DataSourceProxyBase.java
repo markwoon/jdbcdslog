@@ -48,7 +48,7 @@ public class DataSourceProxyBase implements Serializable {
                 String message = LogUtils.appendStackTrace("connect to URL {} for user {}");
                 connectionLogger.info(message, con.getMetaData().getURL(), con.getMetaData().getUserName());
             }
-            return ConnectionLoggingProxy.wrap(con);
+            return ProxyUtils.wrapByConnectionProxy(con);
         } else {
             throw new SQLException("targetDS doesn't implement DataSource interface.");
         }
@@ -65,7 +65,7 @@ public class DataSourceProxyBase implements Serializable {
                 String message = LogUtils.appendStackTrace("connect to URL {} for user {}");
                 connectionLogger.info(message, con.getMetaData().getURL(), con.getMetaData().getUserName());
             }
-            return ConnectionLoggingProxy.wrap(con);
+            return ProxyUtils.wrapByConnectionProxy(con);
         } else {
             throw new SQLException("targetDS doesn't implement DataSource interface.");
         }
@@ -117,7 +117,7 @@ public class DataSourceProxyBase implements Serializable {
         }
         if (targetDs instanceof XADataSource) {
             XAConnection con = ((XADataSource) targetDs).getXAConnection();
-            return XAConnectionLoggingProxy.wrap(con);
+            return ProxyUtils.wrapByXaConnection(con);
         } else {
             throw new SQLException("targetDS doesn't implement XADataSource interface.");
         }
@@ -127,7 +127,7 @@ public class DataSourceProxyBase implements Serializable {
         if (targetDs == null)
             throw new SQLException("targetDS parameter has not been passed to Database or URL property.");
         if (targetDs instanceof XADataSource)
-            return XAConnectionLoggingProxy.wrap(((XADataSource) targetDs).getXAConnection(user, password));
+            return ProxyUtils.wrapByXaConnection(((XADataSource) targetDs).getXAConnection(user, password));
         else
             throw new SQLException("targetDS doesn't implement XADataSource interface.");
     }
@@ -136,7 +136,7 @@ public class DataSourceProxyBase implements Serializable {
         if (targetDs == null)
             throw new SQLException("targetDS parameter has not been passed to Database or URL property.");
         if (targetDs instanceof ConnectionPoolDataSource)
-            return PooledConnectionLoggingProxy.wrap(((ConnectionPoolDataSource) targetDs).getPooledConnection());
+            return ProxyUtils.wrapByPooledConnection(((ConnectionPoolDataSource) targetDs).getPooledConnection());
         else
             throw new SQLException("targetDS doesn't implement ConnectionPoolDataSource interface.");
     }
@@ -145,7 +145,7 @@ public class DataSourceProxyBase implements Serializable {
         if (targetDs == null)
             throw new SQLException("targetDS parameter has not been passed to Database or URL property.");
         if (targetDs instanceof ConnectionPoolDataSource)
-            return PooledConnectionLoggingProxy.wrap(((ConnectionPoolDataSource) targetDs).getPooledConnection(user, password));
+            return ProxyUtils.wrapByPooledConnection(((ConnectionPoolDataSource) targetDs).getPooledConnection(user, password));
         else
             throw new SQLException("targetDS doesn't implement ConnectionPoolDataSource interface.");
     }

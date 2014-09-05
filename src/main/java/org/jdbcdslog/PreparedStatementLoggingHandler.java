@@ -2,8 +2,8 @@ package org.jdbcdslog;
 
 import static org.jdbcdslog.Loggers.statementLogger;
 import static org.jdbcdslog.Loggers.slowQueryLogger;
+import static org.jdbcdslog.ProxyUtils.*;
 
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,10 +12,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class PreparedStatementLoggingHandler implements InvocationHandler {
+public class PreparedStatementLoggingHandler extends LoggingHandlerSupport {
     protected TreeMap<Integer, Object> parameters = new TreeMap<Integer, Object>();
-
-    protected Object target = null;
 
     protected String sql = null;
 
@@ -29,7 +27,7 @@ public class PreparedStatementLoggingHandler implements InvocationHandler {
             = new HashSet<String>(Arrays.asList("addBatch", "execute", "executeQuery", "executeUpdate" ));
 
     public PreparedStatementLoggingHandler(PreparedStatement ps, String sql) {
-        target = ps;
+        super(ps);
         this.sql = sql;
     }
 
@@ -42,6 +40,16 @@ public class PreparedStatementLoggingHandler implements InvocationHandler {
                 t1 = System.nanoTime();
             }
             r = method.invoke(target, args);
+
+            if (UNWRAP_METHOD_NAME.equals(method.getName())) {
+                Class<?> unwrapClass = (Class<?>)args[0];
+                if (r == target && unwrapClass.isInstance(proxy)) {
+                    r = proxy;      // returning original proxy if it is enough to represent the unwrapped obj
+                } else {
+                    r = wrapByPreparedStatementProxy(r, sql);
+                }
+            }
+
             if (SET_METHODS.contains(method.getName()) && args[0] instanceof Integer) {
                 parameters.put((Integer)args[0], args[1]);
             }
@@ -66,7 +74,7 @@ public class PreparedStatementLoggingHandler implements InvocationHandler {
                 }
             }
             if (r instanceof ResultSet)
-                r = ResultSetLoggingHandler.wrapByResultSetProxy((ResultSet) r);
+                r = wrapByResultSetProxy((ResultSet) r);
         } catch (Throwable t) {
             LogUtils.handleException(t, statementLogger, LogUtils.createLogEntry(method, sql, parameters, null));
         }

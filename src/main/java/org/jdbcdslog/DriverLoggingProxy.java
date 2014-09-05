@@ -61,7 +61,7 @@ public class DriverLoggingProxy implements Driver {
         url = url.substring(0, url.length() - targetDriver.length() - targetDriverParameter.length() - 2);
         try {
             Class.forName(targetDriver);
-            return ConnectionLoggingProxy.wrap(DriverManager.getConnection(url, info));
+            return ProxyUtils.wrapByConnectionProxy(DriverManager.getConnection(url, info));
         } catch (Exception e) {
             connectionLogger.error("Error in getting connection for targetDriver {}, for url {} with properties: {}",
                                         targetDriver, url, info, e);
