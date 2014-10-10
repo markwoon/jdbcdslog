@@ -93,6 +93,15 @@ public class LogUtils {
         if (method != null) {
             s.append(method.getDeclaringClass().getName()).append(".").append(method.getName()).append(": ");
         }
+        appendSql(s, sql, parameters, namedParameters);
+
+        return s;
+    }
+
+    public static void appendSql(StringBuilder s,
+                                 String sql,
+                                 TreeMap<Integer, Object> parameters,
+                                 TreeMap<String, Object> namedParameters) {
 
         if (ConfigurationParameters.inlineQueryParams) {
             if (parameters != null && !parameters.isEmpty()) {
@@ -105,22 +114,9 @@ public class LogUtils {
 
         }
 
-        return s;
     }
 
-    public static StringBuilder createLogEntryForInlineIndexedParams(String sql, TreeMap<Integer,Object> parameters) {
-        StringBuilder sb = new StringBuilder();
-        appendSqlWithInlineIndexedParams(sb, sql, parameters);
-        return sb;
-    }
-
-    public static StringBuilder createLogEntryForInlineNamedParams(String sql, TreeMap<String,Object> namedParameters) {
-        StringBuilder sb = new StringBuilder();
-        appendSqlWithInlineNamedParams(sb, sql, namedParameters);
-        return sb;
-    }
-
-    private static void appendSqlWithSeparateParams(StringBuilder s,
+    protected static void appendSqlWithSeparateParams(StringBuilder s,
                                                     String sql,
                                                     TreeMap<Integer, Object> parameters,
                                                     TreeMap<String, Object> namedParameters) {
@@ -136,7 +132,7 @@ public class LogUtils {
         }
     }
 
-    private static void appendSqlWithInlineIndexedParams(StringBuilder sb, String sql, TreeMap<Integer,Object> parameters) {
+    protected static void appendSqlWithInlineIndexedParams(StringBuilder sb, String sql, TreeMap<Integer,Object> parameters) {
 
         if (sql != null) {
             int questionMarkCount = 1;
@@ -154,7 +150,7 @@ public class LogUtils {
         }
     }
 
-    private static void appendSqlWithInlineNamedParams(StringBuilder sb, String sql, TreeMap<String,Object> namedParameters) {
+    protected static void appendSqlWithInlineNamedParams(StringBuilder sb, String sql, TreeMap<String,Object> namedParameters) {
         if (sql != null) {
             if (namedParameters != null && !namedParameters.isEmpty()) {
                 for (Entry<String, Object> entry : namedParameters.entrySet()) {
@@ -167,7 +163,7 @@ public class LogUtils {
     }
 
     // Refer apache common lang StringUtils.
-    public static String replaceEach(String text, String[] searchList, String[] replacementList) {
+    protected static String replaceEach(String text, String[] searchList, String[] replacementList) {
 
         // mchyzer Performance note: This creates very few new objects (one major goal)
         // let me know if there are performance requests, we can create a harness to measure

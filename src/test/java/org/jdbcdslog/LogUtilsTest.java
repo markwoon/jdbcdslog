@@ -30,9 +30,12 @@ public class LogUtilsTest {
         parameters.put(3, cal.getTime());
         parameters.put(4, new Timestamp(cal.getTimeInMillis()));
 
+        StringBuilder sb = new StringBuilder();
+        LogUtils.appendSqlWithInlineIndexedParams(sb, sql, parameters);
+
         assertEquals(
                 "select * from mc_instr where instr_cde = 'IN\\S$T\\$S4R0''3'||chr(38)||'0''11'||chr(10)||'1'||chr(9)||'2'||chr(10)||'line' and instcl_id = 1 and expr_date = to_date('2011-01-01', 'yyyy-MM-dd') and last_upd_time = to_timestamp('2011-01-01 23:59:59.000', 'yyyy-MM-dd hh24:mi:ss.ff3');",
-                LogUtils.createLogEntryForInlineIndexedParams(sql, parameters).toString());
+                sb.toString());
     }
 
     @Test
@@ -113,9 +116,12 @@ public class LogUtilsTest {
 
         parameters.put(6, Boolean.TRUE);
 
+        StringBuilder sb = new StringBuilder();
+        LogUtils.appendSqlWithInlineIndexedParams(sb, sql, parameters);
+
         assertEquals(
                 "INSERT INTO test VALUES (1, 'IN\\\\ST\\\\$S4\\\\R\\r\\n\\t0\\'3&0', '2011-01-01', '2011-01-01 23:59:59', '23:59:59', '1');",
-                LogUtils.createLogEntryForInlineIndexedParams(sql, parameters).toString());
+                sb.toString());
     }
 
     @Ignore
@@ -134,9 +140,12 @@ public class LogUtilsTest {
 
         parameters.put(5, Boolean.TRUE);
 
+        StringBuilder sb = new StringBuilder();
+        LogUtils.appendSqlWithInlineIndexedParams(sb, sql, parameters);
+
         assertEquals(
                 "INSERT INTO test VALUES (1, 'IN\\ST\\$S4\\R0''3&0', '2011-01-01', '2011-01-01 23:59:59', '1');",
-                LogUtils.createLogEntryForInlineIndexedParams(sql, parameters).toString());
+                sb.toString());
     }
 
     public static void main(String[] args) {

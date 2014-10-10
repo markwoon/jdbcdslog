@@ -1,7 +1,6 @@
 package org.jdbcdslog;
 
-import static org.jdbcdslog.Loggers.statementLogger;
-import static org.jdbcdslog.Loggers.slowQueryLogger;
+import static org.jdbcdslog.Loggers.*;
 import static org.jdbcdslog.ProxyUtils.*;
 
 import java.lang.reflect.Method;
@@ -12,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class PreparedStatementLoggingHandler extends LoggingHandlerSupport {
+public class PreparedStatementLoggingHandler extends StatementLoggingHandlerTemplate {
     protected TreeMap<Integer, Object> parameters = new TreeMap<Integer, Object>();
 
     protected String sql = null;
@@ -31,53 +30,58 @@ public class PreparedStatementLoggingHandler extends LoggingHandlerSupport {
         this.sql = sql;
     }
 
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        Object r = null;
-        try {
-            long t1 = 0;
-            boolean toLog = (statementLogger.isInfoEnabled() || slowQueryLogger.isInfoEnabled()) && EXECUTE_METHODS.contains(method.getName());
-            if (toLog) {
-                t1 = System.nanoTime();
+
+    @Override
+    protected boolean needsLogging(Object proxy,Method method, Object[] args) {
+        return (statementLogger.isInfoEnabled() || slowQueryLogger.isInfoEnabled())
+                && EXECUTE_METHODS.contains(method.getName());
+    }
+
+
+    @Override
+    protected boolean needsSlowOperationLogging(Object proxy, Method method, Object[] args, Object result, long elapsedTimeInNano) {
+        return true;
+    }
+
+    @Override
+    protected void prepareLogMessage(StringBuilder sb, Object proxy, Method method, Object[] args) {
+        LogUtils.appendSql(sb, sql, parameters, null);
+    }
+
+    @Override
+    protected Object doAfterInvoke(Object proxy,Method method, Object[] args, Object result) {
+        Object r = result;
+
+        if (UNWRAP_METHOD_NAME.equals(method.getName())) {
+            Class<?> unwrapClass = (Class<?>)args[0];
+            if (r == target && unwrapClass.isInstance(proxy)) {
+                r = proxy;      // returning original proxy if it is enough to represent the unwrapped obj
+            } else {
+                r = wrapByPreparedStatementProxy(r, sql);
             }
-            r = method.invoke(target, args);
-
-            if (UNWRAP_METHOD_NAME.equals(method.getName())) {
-                Class<?> unwrapClass = (Class<?>)args[0];
-                if (r == target && unwrapClass.isInstance(proxy)) {
-                    r = proxy;      // returning original proxy if it is enough to represent the unwrapped obj
-                } else {
-                    r = wrapByPreparedStatementProxy(r, sql);
-                }
-            }
-
-            if (SET_METHODS.contains(method.getName()) && args[0] instanceof Integer) {
-                parameters.put((Integer)args[0], args[1]);
-            }
-
-            if ("clearParameters".equals(method.getName())) {
-                parameters.clear();
-            }
-
-            if (toLog) {
-                StringBuilder sb = LogUtils.createLogEntry(method, sql, parameters, null);
-
-                long t2 = System.nanoTime();
-                long time = t2 - t1;
-
-                LogUtils.appendStackTrace(sb);
-                LogUtils.appendElapsedTime(sb, time);
-
-                statementLogger.info(sb.toString());
-
-                if (time/1000000 >= ConfigurationParameters.slowQueryThreshold) {
-                    slowQueryLogger.info(sb.toString());
-                }
-            }
-            if (r instanceof ResultSet)
-                r = wrapByResultSetProxy((ResultSet) r);
-        } catch (Throwable t) {
-            LogUtils.handleException(t, statementLogger, LogUtils.createLogEntry(method, sql, parameters, null));
         }
+
+        if (r instanceof ResultSet) {
+            r = wrapByResultSetProxy((ResultSet) r);
+        }
+
+
+        if (SET_METHODS.contains(method.getName()) && args[0] instanceof Integer) {
+            parameters.put((Integer)args[0], args[1]);
+        }
+
+        if ("clearParameters".equals(method.getName())) {
+            parameters.clear();
+        }
+
+
         return r;
     }
+
+    @Override
+    protected void handleException(Throwable t, Object proxy, Method method, Object[] args) throws Throwable {
+        LogUtils.handleException(t, statementLogger, LogUtils.createLogEntry(method, sql, parameters, null));
+    }
+
+
 }

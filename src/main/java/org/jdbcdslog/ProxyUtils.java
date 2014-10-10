@@ -109,7 +109,7 @@ public class ProxyUtils {
      * @return
      * @throws Exception
      */
-    public static Object wrap(Object r, Object...args) throws Exception {
+    public static Object wrap(Object r, Object...args) {
         if (r instanceof Connection) {
             return wrapByConnectionProxy(r);
         } else if (r instanceof CallableStatement) {

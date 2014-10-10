@@ -20,6 +20,8 @@ public class ConfigurationParameters {
     static String printStackTracePattern = null;
     static boolean inlineQueryParams = true;
     static RdbmsSpecifics rdbmsSpecifics = new OracleRdbmsSpecifics(); // oracle is default db.
+    static boolean logBeforeStatement = false;
+    static boolean logDetailAfterStatement = true;
 
     static {
         ClassLoader loader = ConfigurationParameters.class.getClassLoader();
@@ -39,6 +41,8 @@ public class ConfigurationParameters {
             initShowTime();
             initInlineQueryParams();
             initRdbmsSpecifics();
+            initLogBeforeStatement();
+            initLogDetailAfterStatement();
 
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -64,22 +68,15 @@ public class ConfigurationParameters {
     }
 
     private static void initLogText() {
-        String sLogText = props.getProperty("jdbcdslog.logText", "false");
-        if ("true".equalsIgnoreCase(sLogText)) {
-            logText = true;
-        }
+        logText = "true".equalsIgnoreCase(props.getProperty("jdbcdslog.logText", "false"));
     }
 
     private static void initPrintStackTrace() {
-        String sPrintStackTrace = props.getProperty("jdbcdslog.printStackTrace", "false");
-        if ("true".equalsIgnoreCase(sPrintStackTrace)) {
-            printStackTrace = true;
-        }
+        printStackTrace = "true".equalsIgnoreCase(props.getProperty("jdbcdslog.printStackTrace", "false"));
     }
 
     private static void initPrintFullStackTrace() {
-        String sPrintFullStackTrace = props.getProperty("jdbcdslog.printFullStackTrace", "false");
-        printFullStackTrace = "true".equalsIgnoreCase(sPrintFullStackTrace);
+        printFullStackTrace = "true".equalsIgnoreCase(props.getProperty("jdbcdslog.printFullStackTrace", "false"));
     }
 
     private static void initPrintStackTracePattern() {
@@ -88,15 +85,11 @@ public class ConfigurationParameters {
 
 
     private static void initShowTime() {
-        String isShowTime = props.getProperty("jdbcdslog.showTime", "false");
-        if ("true".equalsIgnoreCase(isShowTime)) {
-            showTime = true;
-        }
+        showTime = "true".equalsIgnoreCase(props.getProperty("jdbcdslog.showTime", "false"));
     }
 
     private static void initInlineQueryParams() {
-        String isInlineQueryParams = props.getProperty("jdbcdslog.inlineQueryParams", "true");
-        inlineQueryParams = ("true".equalsIgnoreCase(isInlineQueryParams)) ;
+        inlineQueryParams = ("true".equalsIgnoreCase(props.getProperty("jdbcdslog.inlineQueryParams", "true"))) ;
     }
 
     private static void initRdbmsSpecifics() {
@@ -109,6 +102,21 @@ public class ConfigurationParameters {
             rdbmsSpecifics = new SqlServerRdbmsSpecifics();
         }
     }
+
+
+    private static void initLogBeforeStatement() {
+        logBeforeStatement = "true".equalsIgnoreCase(props.getProperty("jdbcdslog.logBeforeStatement", "false"));
+    }
+
+    private static void initLogDetailAfterStatement() {
+        if ( ! logBeforeStatement) {
+            logDetailAfterStatement = true;
+        } else {
+            logDetailAfterStatement = "true".equalsIgnoreCase(props.getProperty("jdbcdslog.logDetailAfterStatement", "true"));
+        }
+    }
+
+
     /* init parameters end. */
 
     public static void setLogText(boolean alogText) {
