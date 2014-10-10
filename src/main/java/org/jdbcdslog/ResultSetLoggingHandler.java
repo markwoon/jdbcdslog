@@ -20,7 +20,7 @@ public class ResultSetLoggingHandler extends LoggingHandlerSupport {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Object r = null;
-        long t1 = System.nanoTime();
+        long startTimeInNano = System.nanoTime();
 
         try {
             r = method.invoke(targetResultSet, args);
@@ -38,11 +38,11 @@ public class ResultSetLoggingHandler extends LoggingHandlerSupport {
         }
 
         if (resultSetLogger.isInfoEnabled() && method.getName().equals("next")) {
-            long t2 = System.nanoTime();
-            long time = t2 - t1;
-            totalFetchTime += time;
+            long elapsedTimeInNano = System.nanoTime() - startTimeInNano;
 
-            if ((Boolean) r ) {
+            totalFetchTime += elapsedTimeInNano;
+
+            if ((Boolean) r ) {     // next() returns true
                 ++resultCount;
                 if (resultSetLogger.isDebugEnabled()) {
 
@@ -59,7 +59,7 @@ public class ResultSetLoggingHandler extends LoggingHandlerSupport {
                     sb.append("} Row Number: ").append(resultCount);
 
                     LogUtils.appendStackTrace(sb);
-                    LogUtils.appendElapsedTime(sb, time);
+                    LogUtils.appendElapsedTime(sb, elapsedTimeInNano);
 
                     resultSetLogger.debug(sb.toString());
                 }
@@ -68,10 +68,10 @@ public class ResultSetLoggingHandler extends LoggingHandlerSupport {
 
                 StringBuilder sb = new StringBuilder(method.getDeclaringClass().getName()).append(".").append(method.getName()).append(": ")
                                         .append(" Total Results: ").append(resultCount)
-                                        .append(".  Total fetch time: ").append(String.format("%.9f", totalFetchTime/1000000000.0)).append(" s.");
+                                        .append(".  Total Fetch Time: ").append(String.format("%.9f", totalFetchTime/1000000000.0)).append(" s.");
                 totalFetchTime = 0;
                 LogUtils.appendStackTrace(sb);
-                LogUtils.appendElapsedTime(sb, time);
+                LogUtils.appendElapsedTime(sb, elapsedTimeInNano);
 
                 resultSetLogger.info(sb.toString());
             }

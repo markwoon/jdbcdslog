@@ -8,7 +8,7 @@ public class ConnectionPoolXADataSourceProxy extends DataSourceProxyBase impleme
 
     private static final long serialVersionUID = 5829721261280763559L;
 
-    public ConnectionPoolXADataSourceProxy() throws JDBCDSLogException {
+    public ConnectionPoolXADataSourceProxy() throws JdbcDsLogRuntimeException {
         super();
     }
 

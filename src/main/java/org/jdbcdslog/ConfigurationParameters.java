@@ -13,7 +13,6 @@ public class ConfigurationParameters {
     private static Properties props;
 
     static long slowQueryThreshold = Long.MAX_VALUE;
-    static boolean logText = false;
     static Boolean showTime = false;
     static boolean printStackTrace = false;
     static boolean printFullStackTrace = false;
@@ -34,7 +33,6 @@ public class ConfigurationParameters {
             }
 
             initSlowQueryThreshold();
-            initLogText();
             initPrintStackTrace();
             initPrintFullStackTrace();
             initPrintStackTracePattern();
@@ -65,10 +63,6 @@ public class ConfigurationParameters {
         if (slowQueryThreshold == -1) {
             slowQueryThreshold = Long.MAX_VALUE;
         }
-    }
-
-    private static void initLogText() {
-        logText = "true".equalsIgnoreCase(props.getProperty("jdbcdslog.logText", "false"));
     }
 
     private static void initPrintStackTrace() {
@@ -118,10 +112,6 @@ public class ConfigurationParameters {
 
 
     /* init parameters end. */
-
-    public static void setLogText(boolean alogText) {
-        logText = alogText;
-    }
 
     private static boolean isLong(String sSlowQueryThreshold) {
         try {

@@ -34,7 +34,7 @@ public class DataSourceProxyBase implements Serializable {
 
     protected Map<String, Class<?>> propClasses = new HashMap<String, Class<?>>();
 
-    public DataSourceProxyBase() throws JDBCDSLogException {
+    public DataSourceProxyBase() throws JdbcDsLogRuntimeException {
     }
 
     public Connection getConnection() throws SQLException {
@@ -166,12 +166,12 @@ public class DataSourceProxyBase implements Serializable {
         }
     }
 
-    public void setURL(String url) throws JDBCDSLogException {
+    public void setURL(String url) throws JdbcDsLogRuntimeException {
         url = initTargetDS(url);
         invokeTargetSetMethod("setURL", url, String.class);
     }
 
-    private String initTargetDS(String url) throws JDBCDSLogException {
+    private String initTargetDS(String url) throws JdbcDsLogRuntimeException {
         logger.debug("initTargetDS: url={}, targetDs={}", url, targetDs);
         try {
             if (url == null || targetDs != null)
@@ -194,7 +194,7 @@ public class DataSourceProxyBase implements Serializable {
             return url;
         } catch (Throwable t) {
             connectionLogger.error("Error in initTargetDS() url={}", url, t);
-            throw new JDBCDSLogException(t);
+            throw new JdbcDsLogRuntimeException(t);
         }
     }
 
@@ -203,18 +203,18 @@ public class DataSourceProxyBase implements Serializable {
         logger.debug("setTargetDSDirect(): targetDS initialized.");
     }
 
-    public void setTargetDS(String targetDSName) throws JDBCDSLogException, InstantiationException, IllegalAccessException {
+    public void setTargetDS(String targetDSName) throws JdbcDsLogRuntimeException, InstantiationException, IllegalAccessException {
         try {
             Class<?> cl = Class.forName(targetDSName);
             if (cl == null)
-                throw new JDBCDSLogException("Can't load class of targetDS.");
+                throw new JdbcDsLogRuntimeException("Can't load class of targetDS.");
             Object targetObj = cl.newInstance();
             targetDs = targetObj;
             logger.debug("setTargetDS(): targetDS initialized.");
             setPropertiesForTargetDS();
         } catch (Throwable t) {
             connectionLogger.error("Error in setTargetDS(): targetDSName={}", targetDSName, t);
-            throw new JDBCDSLogException(t);
+            throw new JdbcDsLogRuntimeException(t);
         }
     }
 
@@ -268,7 +268,7 @@ public class DataSourceProxyBase implements Serializable {
         invokeTargetSetMethod("setUser", p, String.class);
     }
 
-    public void setDatabase(String p) throws JDBCDSLogException {
+    public void setDatabase(String p) throws JdbcDsLogRuntimeException {
         p = initTargetDS(p);
         invokeTargetSetMethod("setDatabase", p, String.class);
     }

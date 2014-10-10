@@ -29,7 +29,7 @@ public class DriverLoggingProxy implements Driver {
         }
     }
 
-    public DriverLoggingProxy() throws JDBCDSLogException {
+    public DriverLoggingProxy() throws JdbcDsLogRuntimeException {
     }
 
     public boolean acceptsURL(String url) throws SQLException {
