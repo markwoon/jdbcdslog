@@ -16,6 +16,8 @@ import org.slf4j.Logger;
  */
 public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupport {
 
+    protected StringBuilder batchStatements = new StringBuilder();
+
     public StatementLoggingHandlerTemplate(Object target) {
         super(target);
     }
@@ -25,17 +27,34 @@ public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupp
 
         try {
             boolean needsLog = needsLogging(proxy, method, args);
+            boolean isAddBatch = isAddBatch(proxy, method, args);
+            boolean isExecuteBatch = isExecuteBatch(proxy, method, args);
             long startTimeInNano = 0;
             StringBuilder sb= null;
-
-            doBeforeInvoke(proxy, method, args);
 
             if (needsLog) {
                 startTimeInNano = System.nanoTime();
 
                 sb = new StringBuilder("START: ");      // Reserve space for START: and END:
                 sb.append(method.getDeclaringClass().getName()).append(".").append(method.getName()).append(": ");
-                prepareLogMessage(sb, proxy, method, args);
+
+                if (isExecuteBatch) {
+                    if (ConfigurationParameters.logExecuteBatchDetail) {
+                        sb.append(this.batchStatements);
+                    }
+                    this.batchStatements = new StringBuilder();
+                } else if (isAddBatch) {
+                    if (ConfigurationParameters.logAddBatchDetail) {
+                        appendStatement(sb, proxy, method, args);
+                    }
+                    if (ConfigurationParameters.logExecuteBatchDetail) {
+                        this.batchStatements.append('\n');
+                        appendStatement(this.batchStatements, proxy, method, args);
+                    }
+                }  else {
+                    appendStatement(sb, proxy, method, args);
+                }
+
                 appendStackTrace(sb);
 
                 logBeforeInvoke(proxy, method, args, sb);
@@ -67,15 +86,20 @@ public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupp
         return null;
     }
 
-    protected void prepareLogMessage(StringBuilder sb, Object proxy, Method method, Object[] args) {
-        // do nothing
+    protected boolean isExecuteBatch(Object proxy, Method method, Object[] args) {
+        return method.getName().equals("executeBatch");
     }
+
+
+    protected boolean isAddBatch(Object proxy, Method method, Object[] args) {
+        return method.getName().equals("addBatch");
+    }
+
+
+    protected abstract void appendStatement(StringBuilder sb, Object proxy, Method method, Object[] args) ;
 
     protected boolean needsLogging(Object proxy, Method method, Object[] args) {
         return false;
-    }
-
-    protected void doBeforeInvoke(Object proxy, Method method, Object[] args) {
     }
 
     protected void logBeforeInvoke(Object proxy, Method method, Object[] args, StringBuilder sb) {
@@ -88,9 +112,9 @@ public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupp
         return wrap(result);
     }
 
-    protected void logAfterInvoke(Object proxy, Method method, Object[] args, Object result, long elapsedTimeInNano, StringBuilder sb) {
+    protected void logAfterInvoke(Object proxy, Method method, Object[] args, Object result, long elapsedTimeInNano, StringBuilder message) {
 
-        StringBuilder endMessage = sb;
+        StringBuilder endMessage = message;
         if ( ! ConfigurationParameters.logDetailAfterStatement) {
             // replace the log message to a simple message
 
@@ -105,7 +129,7 @@ public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupp
         getLogger().info(endMessage.toString());
 
         if (elapsedTimeInNano/1000000 >= ConfigurationParameters.slowQueryThreshold) {
-            getSlowQueryLogger().info(endMessage.toString());
+            getSlowQueryLogger().info(message.toString());       // log the original message
         }
 
     }

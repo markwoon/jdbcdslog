@@ -1,10 +1,11 @@
 package org.jdbcdslog;
 
 import static org.jdbcdslog.Loggers.*;
-import static org.jdbcdslog.ProxyUtils.wrapByCallableStatementProxy;
+import static org.jdbcdslog.ProxyUtils.*;
 
 import java.lang.reflect.Method;
 import java.sql.CallableStatement;
+import java.sql.ResultSet;
 import java.util.TreeMap;
 
 public class CallableStatementLoggingHandler extends PreparedStatementLoggingHandler {
@@ -22,12 +23,7 @@ public class CallableStatementLoggingHandler extends PreparedStatementLoggingHan
     }
 
     @Override
-    protected boolean needsSlowOperationLogging(Object proxy, Method method, Object[] args, Object result, long elapsedTimeInNano) {
-        return true;
-    }
-
-    @Override
-    protected void prepareLogMessage(StringBuilder sb, Object proxy, Method method, Object[] args) {
+    protected void appendStatement(StringBuilder sb, Object proxy, Method method, Object[] args) {
         LogUtils.appendSql(sb, sql, parameters, namedParameters);
     }
 
@@ -42,6 +38,10 @@ public class CallableStatementLoggingHandler extends PreparedStatementLoggingHan
             } else {
                 r = wrapByCallableStatementProxy(r, sql);
             }
+        }
+
+        if (r instanceof ResultSet) {
+            r = wrapByResultSetProxy((ResultSet) r);
         }
 
         if (SET_METHODS.contains(method.getName())) {

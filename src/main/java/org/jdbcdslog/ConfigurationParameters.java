@@ -21,6 +21,8 @@ public class ConfigurationParameters {
     static RdbmsSpecifics rdbmsSpecifics = new OracleRdbmsSpecifics(); // oracle is default db.
     static boolean logBeforeStatement = false;
     static boolean logDetailAfterStatement = true;
+    static boolean logAddBatchDetail = true;
+    static boolean logExecuteBatchDetail =true;
 
     static {
         ClassLoader loader = ConfigurationParameters.class.getClassLoader();
@@ -41,6 +43,8 @@ public class ConfigurationParameters {
             initRdbmsSpecifics();
             initLogBeforeStatement();
             initLogDetailAfterStatement();
+            initLogAddBatchDetail();
+            initLogExecuteBatchDetail();
 
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -110,6 +114,14 @@ public class ConfigurationParameters {
         }
     }
 
+
+    private static void initLogAddBatchDetail() {
+        logAddBatchDetail = "true".equalsIgnoreCase(props.getProperty("jdbcdslog.logAddBatchDetail", "true"));
+    }
+
+    private static void initLogExecuteBatchDetail() {
+        logExecuteBatchDetail = "true".equalsIgnoreCase(props.getProperty("jdbcdslog.logExecuteBatchDetail", "false"));
+    }
 
     /* init parameters end. */
 

@@ -23,7 +23,7 @@ public class PreparedStatementLoggingHandler extends StatementLoggingHandlerTemp
                                                 "setTime", "setTimestamp", "setURL" ));
 
     protected static final Set<String> EXECUTE_METHODS
-            = new HashSet<String>(Arrays.asList("addBatch", "execute", "executeQuery", "executeUpdate" ));
+            = new HashSet<String>(Arrays.asList("addBatch", "execute", "executeQuery", "executeUpdate", "executeBatch" ));
 
     public PreparedStatementLoggingHandler(PreparedStatement ps, String sql) {
         super(ps);
@@ -39,12 +39,7 @@ public class PreparedStatementLoggingHandler extends StatementLoggingHandlerTemp
 
 
     @Override
-    protected boolean needsSlowOperationLogging(Object proxy, Method method, Object[] args, Object result, long elapsedTimeInNano) {
-        return true;
-    }
-
-    @Override
-    protected void prepareLogMessage(StringBuilder sb, Object proxy, Method method, Object[] args) {
+    protected void appendStatement(StringBuilder sb, Object proxy, Method method, Object[] args) {
         LogUtils.appendSql(sb, sql, parameters, null);
     }
 

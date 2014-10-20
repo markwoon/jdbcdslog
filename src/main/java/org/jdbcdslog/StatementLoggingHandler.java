@@ -12,7 +12,7 @@ import java.util.Set;
 
 
 public class StatementLoggingHandler extends StatementLoggingHandlerTemplate {
-    protected final static Set<String> EXECUTE_METHODS = new HashSet<String>(Arrays.asList("addBatch", "execute", "executeQuery", "executeUpdate"));
+    protected final static Set<String> EXECUTE_METHODS = new HashSet<String>(Arrays.asList("addBatch", "execute", "executeQuery", "executeUpdate", "executeBatch"));
 
     public StatementLoggingHandler(Statement statement) {
         super(statement);
@@ -25,12 +25,7 @@ public class StatementLoggingHandler extends StatementLoggingHandlerTemplate {
     }
 
     @Override
-    protected boolean needsSlowOperationLogging(Object proxy, Method method, Object[] args, Object result, long elapsedTimeInNano) {
-        return true;
-    }
-
-    @Override
-    protected void prepareLogMessage(StringBuilder sb, Object proxy, Method method, Object[] args) {
+    protected void appendStatement(StringBuilder sb, Object proxy, Method method, Object[] args) {
         LogUtils.appendSql(sb, (args == null || args.length == 0) ? null : args[0].toString(), null, null);
     }
 
