@@ -13,8 +13,8 @@ jdbcdslogexp2 is an fork of [jdbcdslog-exp] that, on top of the features provide
   * Call to ResultSet#next() after the last row will trigger a summary log message which contains total fetch time and total number of records.
 * Can log before and after statement invocations.  Statement logging can be turned off in "after" logging.
 * Better handling in batch-operations.
-  * `executeBatch()` will now be logged with all statements in batch.
-  * `addBatch()` will be logged in debug level because it is less useful as it involves no DB interaction.
+  * `executeBatch()` will now be logged with, optionally, all statements in batch.
+  * `addBatch()` can be configured to include/exclude statement.
 * Dropped pre-JDK5 support and source code is now cleaner with proper use of JDK5+ features like Generics, for-each loop etc.
 * Upgrade to latest SLF4J version, and cleanup of logging codes to be more readable and reduce unnecessary
 * Fix misc bugs and problems in original codebase
@@ -26,14 +26,16 @@ if you want get more infos please see the original version of jdbcdslog at <http
     <dependency>
         <groupId>org.jdbcdslog</groupId>
         <artifactId>jdbcdslogexp2</artifactId>
-        <version>2.0-M1</version>
+        <version>2.0-M2</version>
     </dependency>
 
 
 
 
 ### How To Use
-please see user guide: [Origin JdbcDsLog UserGuide](http://code.google.com/p/jdbcdslog/wiki/UserGuide ) and [JdbcDsLog-exp UserGuide](http://code.google.com/p/jdbcdslog-exp/wiki/UserGuide)
+Please see user guide: [JDBC DS Log Exp2 User Guide](https://github.com/adrianshum/jdbcdslog/wiki/User-Guide) for JDBC DS Log Exp2 specific features.
+
+For original user guides, please refer to [Origin JdbcDsLog UserGuide](http://code.google.com/p/jdbcdslog/wiki/UserGuide ) and [JdbcDsLog-exp UserGuide](http://code.google.com/p/jdbcdslog-exp/wiki/UserGuide)
 
 ### Support
 if you have any questions,welcome to contact me via Email(adrianshum@gmail.com) or create issues with <https://github.com/adrianshum/jdbcdslog/issues>, I will reply you as soon as possible.
