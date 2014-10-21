@@ -1,7 +1,7 @@
 package org.jdbcdslog;
 
 import static org.jdbcdslog.Loggers.resultSetLogger;
-import static org.jdbcdslog.ProxyUtils.*;
+import static org.jdbcdslog.ProxyUtils.wrapByResultSetProxy;
 
 import java.lang.reflect.Method;
 import java.sql.ResultSet;
@@ -32,7 +32,7 @@ public class ResultSetLoggingHandler extends LoggingHandlerSupport {
             Class<?> unwrapClass = (Class<?>)args[0];
             if (r == target && unwrapClass.isInstance(proxy)) {
                 r = proxy;      // returning original proxy if it is enough to represent the unwrapped obj
-            } else {
+            } else if (unwrapClass.isInterface() && ResultSet.class.isAssignableFrom(unwrapClass)) {
                 r = wrapByResultSetProxy(targetResultSet);
             }
         }

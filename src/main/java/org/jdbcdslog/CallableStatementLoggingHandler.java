@@ -35,7 +35,7 @@ public class CallableStatementLoggingHandler extends PreparedStatementLoggingHan
             Class<?> unwrapClass = (Class<?>)args[0];
             if (r == target && unwrapClass.isInstance(proxy)) {
                 r = proxy;      // returning original proxy if it is enough to represent the unwrapped obj
-            } else {
+            } else if (unwrapClass.isInterface() && CallableStatement.class.isAssignableFrom(unwrapClass)) {
                 r = wrapByCallableStatementProxy(r, sql);
             }
         }

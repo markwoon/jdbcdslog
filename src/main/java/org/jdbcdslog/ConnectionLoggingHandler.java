@@ -4,6 +4,7 @@ import static org.jdbcdslog.Loggers.connectionLogger;
 import static org.jdbcdslog.ProxyUtils.*;
 
 import java.lang.reflect.Method;
+import java.sql.Connection;
 
 public class ConnectionLoggingHandler extends LoggingHandlerSupport {
     public ConnectionLoggingHandler(Object target) {
@@ -18,7 +19,7 @@ public class ConnectionLoggingHandler extends LoggingHandlerSupport {
                 Class<?> unwrapClass = (Class<?>) args[0];
                 if (r == target && unwrapClass.isInstance(proxy)) {
                     r = proxy;      // returning original proxy if it is enough to represent the unwrapped obj
-                } else {
+                } else if (unwrapClass.isInterface() && Connection.class.isAssignableFrom(unwrapClass)) {
                     r = wrapByConnectionProxy(r);
                 }
             } else if (method.getName().equals("createStatement")) {

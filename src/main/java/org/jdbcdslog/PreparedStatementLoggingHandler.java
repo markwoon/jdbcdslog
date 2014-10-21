@@ -51,7 +51,7 @@ public class PreparedStatementLoggingHandler extends StatementLoggingHandlerTemp
             Class<?> unwrapClass = (Class<?>)args[0];
             if (r == target && unwrapClass.isInstance(proxy)) {
                 r = proxy;      // returning original proxy if it is enough to represent the unwrapped obj
-            } else {
+            } else if (unwrapClass.isInterface() && PreparedStatement.class.isAssignableFrom(unwrapClass)) {
                 r = wrapByPreparedStatementProxy(r, sql);
             }
         }
