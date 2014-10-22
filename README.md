@@ -38,4 +38,4 @@ Please see user guide: [JDBC DS Log Exp2 User Guide](https://github.com/adriansh
 For original user guides, please refer to [Origin JdbcDsLog UserGuide](http://code.google.com/p/jdbcdslog/wiki/UserGuide ) and [JdbcDsLog-exp UserGuide](http://code.google.com/p/jdbcdslog-exp/wiki/UserGuide)
 
 ### Support
-if you have any questions,welcome to contact me via Email(adrianshum@gmail.com) or create issues with <https://github.com/adrianshum/jdbcdslog/issues>, I will reply you as soon as possible.
+if you have any questions,welcome to contact me via Email(adrianshum at gmail dot com) or create issues with <https://github.com/adrianshum/jdbcdslog/issues>, I will reply you as soon as possible.
