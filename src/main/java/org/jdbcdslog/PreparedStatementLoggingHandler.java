@@ -6,15 +6,20 @@ import static org.jdbcdslog.ProxyUtils.*;
 import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
 public class PreparedStatementLoggingHandler extends StatementLoggingHandlerTemplate {
-    protected TreeMap<Integer, Object> parameters = new TreeMap<Integer, Object>();
+    protected Map<Integer, Object> parameters = new TreeMap<Integer, Object>();
 
     protected String sql = null;
+
+    protected List<Map<Integer, Object>> batchParameters;
 
     protected static final Set<String> SET_METHODS
             = new HashSet<String>(Arrays.asList("setAsciiStream", "setBigDecimal", "setBinaryStream", "setBoolean", "setByte",
@@ -44,6 +49,20 @@ public class PreparedStatementLoggingHandler extends StatementLoggingHandlerTemp
     }
 
     @Override
+    protected void doAddBatch(Object proxy, Method method, Object[] args) {
+        if (this.batchParameters == null) {
+            this.batchParameters = new ArrayList<Map<Integer,Object>>();
+        }
+
+        this.batchParameters.add(new TreeMap<Integer, Object>(this.parameters));
+    }
+
+    @Override
+    protected void appendBatchStatements(StringBuilder sb) {
+        LogUtils.appendBatchSqls(sb, sql, batchParameters, null);
+    }
+
+    @Override
     protected Object doAfterInvoke(Object proxy,Method method, Object[] args, Object result) {
         Object r = result;
 
@@ -67,6 +86,10 @@ public class PreparedStatementLoggingHandler extends StatementLoggingHandlerTemp
 
         if ("clearParameters".equals(method.getName())) {
             parameters.clear();
+        }
+
+        if ("executeBatch".equals(method.getName())) {
+            batchParameters.clear();
         }
 
 

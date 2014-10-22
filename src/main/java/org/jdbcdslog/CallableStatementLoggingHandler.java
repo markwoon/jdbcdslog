@@ -6,11 +6,15 @@ import static org.jdbcdslog.ProxyUtils.*;
 import java.lang.reflect.Method;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 public class CallableStatementLoggingHandler extends PreparedStatementLoggingHandler {
 
     protected TreeMap<String, Object> namedParameters = new TreeMap<String, Object>();
+    protected List<Map<String, Object>> batchNamedParameters = null;
 
     public CallableStatementLoggingHandler(CallableStatement ps, String sql) {
         super(ps, sql);
@@ -25,6 +29,23 @@ public class CallableStatementLoggingHandler extends PreparedStatementLoggingHan
     @Override
     protected void appendStatement(StringBuilder sb, Object proxy, Method method, Object[] args) {
         LogUtils.appendSql(sb, sql, parameters, namedParameters);
+    }
+
+    @Override
+    protected void doAddBatch(Object proxy, Method method, Object[] args) {
+        if (namedParameters.isEmpty()) {
+            super.doAddBatch(proxy,method,args);
+        } else {
+            if (this.batchNamedParameters == null) {
+                this.batchNamedParameters = new ArrayList<Map<String,Object>>();
+            }
+            this.batchNamedParameters.add(new TreeMap<String, Object>(this.namedParameters));
+        }
+    }
+
+    @Override
+    protected void appendBatchStatements(StringBuilder sb) {
+        LogUtils.appendBatchSqls(sb, sql, batchParameters, batchNamedParameters);
     }
 
     @Override

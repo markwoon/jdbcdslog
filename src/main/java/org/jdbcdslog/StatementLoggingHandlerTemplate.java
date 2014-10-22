@@ -40,7 +40,7 @@ public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupp
 
                 if (isExecuteBatch) {
                     if (ConfigurationParameters.logExecuteBatchDetail) {
-                        sb.append(this.batchStatements);
+                        appendBatchStatements(sb);
                     }
                     this.batchStatements = new StringBuilder();
                 } else if (isAddBatch) {
@@ -48,8 +48,7 @@ public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupp
                         appendStatement(sb, proxy, method, args);
                     }
                     if (ConfigurationParameters.logExecuteBatchDetail) {
-                        this.batchStatements.append('\n');
-                        appendStatement(this.batchStatements, proxy, method, args);
+                        doAddBatch(proxy, method, args);
                     }
                 }  else {
                     appendStatement(sb, proxy, method, args);
@@ -85,6 +84,10 @@ public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupp
         }
         return null;
     }
+
+    protected abstract void doAddBatch(Object proxy, Method method, Object[] args);
+
+    protected abstract void appendBatchStatements(StringBuilder sb);
 
     protected boolean isExecuteBatch(Object proxy, Method method, Object[] args) {
         return method.getName().equals("executeBatch");

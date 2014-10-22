@@ -2,8 +2,9 @@ package org.jdbcdslog;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -88,7 +89,7 @@ public class LogUtils {
         return i;
     }
 
-    public static StringBuilder createLogEntry(Method method, String sql, TreeMap<Integer,Object> parameters, TreeMap<String,Object> namedParameters) {
+    public static StringBuilder createLogEntry(Method method, String sql, Map<Integer,Object> parameters, Map<String,Object> namedParameters) {
         StringBuilder s = new StringBuilder();
         if (method != null) {
             s.append(method.getDeclaringClass().getName()).append(".").append(method.getName()).append(": ");
@@ -100,8 +101,8 @@ public class LogUtils {
 
     public static void appendSql(StringBuilder s,
                                  String sql,
-                                 TreeMap<Integer, Object> parameters,
-                                 TreeMap<String, Object> namedParameters) {
+                                 Map<Integer, Object> parameters,
+                                 Map<String, Object> namedParameters) {
 
         if (ConfigurationParameters.inlineQueryParams) {
             if (parameters != null && !parameters.isEmpty()) {
@@ -118,8 +119,8 @@ public class LogUtils {
 
     protected static void appendSqlWithSeparateParams(StringBuilder s,
                                                     String sql,
-                                                    TreeMap<Integer, Object> parameters,
-                                                    TreeMap<String, Object> namedParameters) {
+                                                    Map<Integer, Object> parameters,
+                                                    Map<String, Object> namedParameters) {
         if (sql != null) {
             s.append(sql);
         }
@@ -132,7 +133,49 @@ public class LogUtils {
         }
     }
 
-    protected static void appendSqlWithInlineIndexedParams(StringBuilder sb, String sql, TreeMap<Integer,Object> parameters) {
+
+    public static void appendBatchSqls(StringBuilder s,
+                                 String sql,
+                                 List<Map<Integer, Object>> parameters,
+                                 List<Map<String, Object>> namedParameters) {
+
+        if (ConfigurationParameters.inlineQueryParams) {
+            if (parameters != null) {
+                for (Map<Integer, Object> p : parameters) {
+                    s.append("\n");
+                    appendSqlWithInlineIndexedParams(s, sql, p);
+                }
+            }
+            if (namedParameters != null) {
+                for (Map<String, Object> p : namedParameters) {
+                    s.append("\n");
+                    appendSqlWithInlineNamedParams(s, sql, p);
+                }
+            }
+        } else {    // display separate query parameters
+            appendBatchSqlsWithSeparateParams(s, sql, parameters, namedParameters);
+
+        }
+
+    }
+
+    protected static void appendBatchSqlsWithSeparateParams(StringBuilder s,
+                                                    String sql,
+                                                    List<Map<Integer, Object>> parameters,
+                                                    List<Map<String, Object>> namedParameters) {
+        if (sql != null) {
+            s.append(sql);
+        }
+        if (parameters != null && !parameters.isEmpty()) {
+            s.append(" parameters: ")
+                .append(parameters);
+        } else if (namedParameters != null && !namedParameters.isEmpty()){
+            s.append(" named parameters: ")
+                .append(namedParameters);
+        }
+    }
+
+    protected static void appendSqlWithInlineIndexedParams(StringBuilder sb, String sql, Map<Integer,Object> parameters) {
 
         if (sql != null) {
             int questionMarkCount = 1;
@@ -150,7 +193,7 @@ public class LogUtils {
         }
     }
 
-    protected static void appendSqlWithInlineNamedParams(StringBuilder sb, String sql, TreeMap<String,Object> namedParameters) {
+    protected static void appendSqlWithInlineNamedParams(StringBuilder sb, String sql, Map<String,Object> namedParameters) {
         if (sql != null) {
             if (namedParameters != null && !namedParameters.isEmpty()) {
                 for (Entry<String, Object> entry : namedParameters.entrySet()) {
