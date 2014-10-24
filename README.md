@@ -26,7 +26,7 @@ if you want get more infos please see the original version of jdbcdslog at <http
     <dependency>
         <groupId>org.jdbcdslog</groupId>
         <artifactId>jdbcdslogexp2</artifactId>
-        <version>2.0-M2</version>
+        <version>2.0</version>
     </dependency>
 
 
