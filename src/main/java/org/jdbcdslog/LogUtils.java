@@ -2,6 +2,7 @@ package org.jdbcdslog;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -82,8 +83,11 @@ public class LogUtils {
             }
         }
 
-        if (i > 0) {
-            ++i;    // skip one more level for the proxy
+        try {
+            if (i > 0 && Proxy.isProxyClass(Class.forName(stackTraces[i].getClassName()))) {
+                ++i;    // skip one more level for the proxy
+            }
+        } catch (ClassNotFoundException ignore) {
         }
 
         return i;
