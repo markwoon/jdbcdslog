@@ -35,7 +35,10 @@ public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupp
             if (needsLog) {
                 startTimeInNano = System.nanoTime();
 
-                sb = new StringBuilder("START: ");      // Reserve space for START: and END:
+                sb = new StringBuilder();
+                if (ConfigurationParameters.logBeforeStatement) {
+                    sb.append("START: ");      // Reserve space for START: and END:
+                }
                 sb.append(method.getDeclaringClass().getName()).append(".").append(method.getName()).append(": ");
 
                 if (isExecuteBatch) {
@@ -65,13 +68,16 @@ public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupp
 
             if (needsLog) {
                 long elapsedTimeInNano = System.nanoTime() - startTimeInNano;
-                sb.setCharAt(0, 'E');
-                sb.setCharAt(1, 'N');
-                sb.setCharAt(2, 'D');
-                sb.setCharAt(3, ':');
-                sb.setCharAt(4, ' ');
-                sb.setCharAt(5, ' ');
-                sb.setCharAt(6, ' ');
+
+                if (ConfigurationParameters.logBeforeStatement) {
+                    sb.setCharAt(0, 'E');
+                    sb.setCharAt(1, 'N');
+                    sb.setCharAt(2, 'D');
+                    sb.setCharAt(3, ':');
+                    sb.setCharAt(4, ' ');
+                    sb.setCharAt(5, ' ');
+                    sb.setCharAt(6, ' ');
+                }
 
                 appendElapsedTime(sb, elapsedTimeInNano);
 
