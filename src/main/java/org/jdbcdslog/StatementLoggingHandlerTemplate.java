@@ -137,7 +137,7 @@ public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupp
 
         getLogger().info(endMessage.toString());
 
-        if (elapsedTimeInNano/1000000 >= ConfigurationParameters.slowQueryThreshold) {
+        if (elapsedTimeInNano >= ConfigurationParameters.slowQueryThresholdInNano) {
             getSlowQueryLogger().info(message.toString());       // log the original message
         }
 

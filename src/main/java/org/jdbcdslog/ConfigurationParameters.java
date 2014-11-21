@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 public class ConfigurationParameters {
 
     private static Logger logger = LoggerFactory.getLogger(ConfigurationParameters.class);
-    private static Properties props;
+    static Properties props;
 
-    static long slowQueryThreshold = Long.MAX_VALUE;
+    static long slowQueryThresholdInNano = Long.MAX_VALUE;
     static Boolean showTime = false;
     static boolean printStackTrace = false;
     static boolean printFullStackTrace = false;
@@ -59,13 +59,26 @@ public class ConfigurationParameters {
     }
 
     /* init parameters start. */
-    private static void initSlowQueryThreshold() {
-        String sSlowQueryThreshold = props.getProperty("jdbcdslog.slowQueryThreshold");
-        if (sSlowQueryThreshold != null && isLong(sSlowQueryThreshold)) {
-            slowQueryThreshold = Long.parseLong(sSlowQueryThreshold);
+    static void initSlowQueryThreshold() {
+        String slowQueryThresholdString = props.getProperty("jdbcdslog.slowQueryThreshold").trim();
+        if (slowQueryThresholdString != null)  {
+            try {
+                if (slowQueryThresholdString.endsWith("ns")) {
+                    slowQueryThresholdInNano = Long.parseLong(slowQueryThresholdString.substring(0, slowQueryThresholdString.length() - 2));
+                } else if (slowQueryThresholdString.endsWith("ms")) {
+                    slowQueryThresholdInNano = Long.parseLong(slowQueryThresholdString.substring(0, slowQueryThresholdString.length() - 2)) * 1000000;
+                } else if (slowQueryThresholdString.endsWith("s")) {
+                    slowQueryThresholdInNano = Long.parseLong(slowQueryThresholdString.substring(0, slowQueryThresholdString.length() - 1)) * 1000000 * 1000;
+                } else {
+                    slowQueryThresholdInNano = Long.parseLong(slowQueryThresholdString) * 1000000;  // assume ms by default
+                }
+            } catch (NumberFormatException ignored) {
+                slowQueryThresholdInNano = 0;
+            }
         }
-        if (slowQueryThreshold == -1) {
-            slowQueryThreshold = Long.MAX_VALUE;
+
+        if (slowQueryThresholdInNano <= 0 ) {
+            slowQueryThresholdInNano = Long.MAX_VALUE;
         }
     }
 
@@ -124,14 +137,4 @@ public class ConfigurationParameters {
     }
 
     /* init parameters end. */
-
-    private static boolean isLong(String sSlowQueryThreshold) {
-        try {
-            Long.parseLong(sSlowQueryThreshold);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
 }
