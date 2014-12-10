@@ -14,6 +14,22 @@ import org.junit.Test;
 public class ConfigurationParametersTest {
 
     @Test
+    public void testInitSlowQueryTheshold_NotDefined_ThenAssumeMilliSecond() {
+        // Given
+        Properties mockProperties = mock(Properties.class);
+        ConfigurationParameters.props = mockProperties;
+        long defaultThreshold = ConfigurationParameters.slowQueryThresholdInNano;
+
+        when(mockProperties.getProperty("jdbcdslog.slowQueryThreshold")).thenReturn(null);
+
+        // When
+        ConfigurationParameters.initSlowQueryThreshold();
+
+        // Then
+        assertEquals("slowQueryTheshold", defaultThreshold, ConfigurationParameters.slowQueryThresholdInNano);
+    }
+
+    @Test
     public void testInitSlowQueryTheshold_GivenNoUnit_ThenAssumeMilliSecond() {
         // Given
         Properties mockProperties = mock(Properties.class);
