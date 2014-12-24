@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -281,4 +282,8 @@ public class DataSourceProxyBase implements Serializable {
         return null;
     }
 
+
+    public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        throw new SQLFeatureNotSupportedException();
+    }
 }

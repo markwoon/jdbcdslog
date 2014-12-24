@@ -88,7 +88,7 @@ public class PreparedStatementLoggingHandler extends StatementLoggingHandlerTemp
             parameters.clear();
         }
 
-        if ("executeBatch".equals(method.getName())) {
+        if (batchParameters != null && "executeBatch".equals(method.getName())) {
             batchParameters.clear();
         }
 

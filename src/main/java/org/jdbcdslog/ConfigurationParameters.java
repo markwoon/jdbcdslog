@@ -60,8 +60,9 @@ public class ConfigurationParameters {
 
     /* init parameters start. */
     static void initSlowQueryThreshold() {
-        String slowQueryThresholdString = props.getProperty("jdbcdslog.slowQueryThreshold").trim();
+        String slowQueryThresholdString = props.getProperty("jdbcdslog.slowQueryThreshold");
         if (slowQueryThresholdString != null)  {
+            slowQueryThresholdString = slowQueryThresholdString.trim();
             try {
                 if (slowQueryThresholdString.endsWith("ns")) {
                     slowQueryThresholdInNano = Long.parseLong(slowQueryThresholdString.substring(0, slowQueryThresholdString.length() - 2));
