@@ -25,11 +25,10 @@ public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupp
 
         try {
             boolean needsLog = needsLogging(proxy, method, args);
-            boolean isAddBatch = isAddBatch(proxy, method, args);
             long startTimeInNano = 0;
             StringBuilder sb= null;
 
-            if (isAddBatch) {
+            if (isAddBatch(proxy, method, args)) {
                 if (!ConfigurationParameters.logAddBatchDetail) {
                     needsLog = false;
                 }
