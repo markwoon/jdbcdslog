@@ -16,8 +16,6 @@ import org.slf4j.Logger;
  */
 public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupport {
 
-    protected StringBuilder batchStatements = new StringBuilder();
-
     public StatementLoggingHandlerTemplate(Object target) {
         super(target);
     }
@@ -27,10 +25,17 @@ public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupp
 
         try {
             boolean needsLog = needsLogging(proxy, method, args);
-            boolean isAddBatch = isAddBatch(proxy, method, args);
-            boolean isExecuteBatch = isExecuteBatch(proxy, method, args);
             long startTimeInNano = 0;
             StringBuilder sb= null;
+
+            if (isAddBatch(proxy, method, args)) {
+                if (!ConfigurationParameters.logAddBatchDetail) {
+                    needsLog = false;
+                }
+                if (ConfigurationParameters.logExecuteBatchDetail) {
+                    doAddBatch(proxy, method, args);
+                }
+            }
 
             if (needsLog) {
                 startTimeInNano = System.nanoTime();
@@ -41,17 +46,9 @@ public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupp
                 }
                 sb.append(method.getDeclaringClass().getName()).append(".").append(method.getName()).append(": ");
 
-                if (isExecuteBatch) {
+                if (isExecuteBatch(proxy, method, args)) {
                     if (ConfigurationParameters.logExecuteBatchDetail) {
                         appendBatchStatements(sb);
-                    }
-                    this.batchStatements = new StringBuilder();
-                } else if (isAddBatch) {
-                    if (ConfigurationParameters.logAddBatchDetail) {
-                        appendStatement(sb, proxy, method, args);
-                    }
-                    if (ConfigurationParameters.logExecuteBatchDetail) {
-                        doAddBatch(proxy, method, args);
                     }
                 }  else {
                     appendStatement(sb, proxy, method, args);
