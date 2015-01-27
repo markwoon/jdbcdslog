@@ -14,11 +14,9 @@
 package org.jdbcdslog;
 
 import static org.jdbcdslog.Loggers.connectionLogger;
-import static org.jdbcdslog.ProxyUtils.*;
+import static org.jdbcdslog.ProxyUtils.wrap;
 
 import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 
 /**
  * Logging handler for objects that can directly or indirectly create Connection from.  For example,
@@ -36,15 +34,7 @@ public class ConnectionSourceLoggingHandler extends LoggingHandlerSupport {
         try {
             Object r = method.invoke(target, args);
 
-            if (r instanceof Connection) {
-                DatabaseMetaData connMetaData = ((Connection) r).getMetaData();
-                if (connectionLogger.isInfoEnabled()) {
-                    String message = LogUtils.appendStackTrace("connect to URL {} for user {}");
-                    connectionLogger.info(message, connMetaData.getURL(), connMetaData.getUserName());
-                }
-            }
-
-            return wrap(r);
+            return wrap(null, r);
 
         } catch (Throwable t) {
             LogUtils.handleException(t, connectionLogger, LogUtils.createLogEntry(method, null, null, null));

@@ -5,6 +5,7 @@ import static org.jdbcdslog.Loggers.*;
 import static org.jdbcdslog.ProxyUtils.wrap;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 
 import org.slf4j.Logger;
 
@@ -15,14 +16,20 @@ import org.slf4j.Logger;
  * @author a511990
  */
 public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupport {
+    protected LogMetaData logMetaData;
 
     public StatementLoggingHandlerTemplate(Object target) {
         super(target);
     }
 
+    public StatementLoggingHandlerTemplate(LogMetaData logMetaData, Object target) {
+        super(target);
+        this.logMetaData = logMetaData;
+    }
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
+        Map<String, String> oldMdc = LogUtils.setMdc(logMetaData);
         try {
             boolean needsLog = needsLogging(proxy, method, args);
             long startTimeInNano = 0;
@@ -84,6 +91,8 @@ public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupp
 
         } catch (Throwable t) {
             handleException(t, proxy, method, args);
+        } finally {
+            LogUtils.resetMdc(oldMdc);
         }
         return null;
     }
@@ -115,7 +124,7 @@ public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupp
     }
 
     protected Object doAfterInvoke(Object proxy, Method method, Object[] args, Object result) {
-        return wrap(result);
+        return wrap(logMetaData, result);
     }
 
     protected void logAfterInvoke(Object proxy, Method method, Object[] args, Object result, long elapsedTimeInNano, StringBuilder message) {

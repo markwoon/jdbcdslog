@@ -3,6 +3,7 @@ package org.jdbcdslog;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -11,10 +12,13 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 public class LogUtils {
 
     static Logger logger = LoggerFactory.getLogger(LogUtils.class);
+
+    public final static String CONNECTION_ID_MDC_KEY = "jdbcdslog.connectionId";
 
     private final static String NAMED_PARAMETERS_PREFIX = ":";
 
@@ -207,6 +211,33 @@ public class LogUtils {
             sb.append(sql).append(";");
         }
 
+    }
+
+    protected static Map<String, String> setMdc(LogMetaData logMetaData) {
+        if (logMetaData == null) {
+            return null;
+        }
+        Map<String, String> oldMdc = new HashMap<String,String>();
+
+        if ( ! logMetaData.getConnectionId().equals(MDC.get(LogUtils.CONNECTION_ID_MDC_KEY))) {
+            oldMdc.put(LogUtils.CONNECTION_ID_MDC_KEY, MDC.get(LogUtils.CONNECTION_ID_MDC_KEY));
+            MDC.put(LogUtils.CONNECTION_ID_MDC_KEY, logMetaData.getConnectionId());
+        }
+
+        return oldMdc;
+    }
+
+    protected static void resetMdc(Map<String, String> oldMdc) {
+        if (oldMdc == null) {
+            return;
+        }
+        for (Map.Entry<String, String> entry: oldMdc.entrySet()) {
+            if (entry.getValue() == null) {
+                MDC.remove(entry.getKey());
+            } else {
+                MDC.put(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     // Refer apache common lang StringUtils.

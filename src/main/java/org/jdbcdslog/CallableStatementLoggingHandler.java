@@ -16,8 +16,8 @@ public class CallableStatementLoggingHandler extends PreparedStatementLoggingHan
     protected TreeMap<String, Object> namedParameters = new TreeMap<String, Object>();
     protected List<Map<String, Object>> batchNamedParameters = null;
 
-    public CallableStatementLoggingHandler(CallableStatement ps, String sql) {
-        super(ps, sql);
+    public CallableStatementLoggingHandler(LogMetaData logMetaData, CallableStatement ps, String sql) {
+        super(logMetaData, ps, sql);
     }
 
     @Override
@@ -57,12 +57,12 @@ public class CallableStatementLoggingHandler extends PreparedStatementLoggingHan
             if (r == target && unwrapClass.isInstance(proxy)) {
                 r = proxy;      // returning original proxy if it is enough to represent the unwrapped obj
             } else if (unwrapClass.isInterface() && CallableStatement.class.isAssignableFrom(unwrapClass)) {
-                r = wrapByCallableStatementProxy(r, sql);
+                r = wrapByCallableStatementProxy(logMetaData, r, sql);
             }
         }
 
         if (r instanceof ResultSet) {
-            r = wrapByResultSetProxy((ResultSet) r);
+            r = wrapByResultSetProxy(logMetaData, (ResultSet) r);
         }
 
         if (SET_METHODS.contains(method.getName())) {

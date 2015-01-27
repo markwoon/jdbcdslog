@@ -30,8 +30,8 @@ public class PreparedStatementLoggingHandler extends StatementLoggingHandlerTemp
     protected static final Set<String> EXECUTE_METHODS
             = new HashSet<String>(Arrays.asList("addBatch", "execute", "executeQuery", "executeUpdate", "executeBatch" ));
 
-    public PreparedStatementLoggingHandler(PreparedStatement ps, String sql) {
-        super(ps);
+    public PreparedStatementLoggingHandler(LogMetaData logMetaData, PreparedStatement ps, String sql) {
+        super(logMetaData, ps);
         this.sql = sql;
     }
 
@@ -71,12 +71,12 @@ public class PreparedStatementLoggingHandler extends StatementLoggingHandlerTemp
             if (r == target && unwrapClass.isInstance(proxy)) {
                 r = proxy;      // returning original proxy if it is enough to represent the unwrapped obj
             } else if (unwrapClass.isInterface() && PreparedStatement.class.isAssignableFrom(unwrapClass)) {
-                r = wrapByPreparedStatementProxy(r, sql);
+                r = wrapByPreparedStatementProxy(logMetaData, r, sql);
             }
         }
 
         if (r instanceof ResultSet) {
-            r = wrapByResultSetProxy((ResultSet) r);
+            r = wrapByResultSetProxy(logMetaData, (ResultSet) r);
         }
 
 
