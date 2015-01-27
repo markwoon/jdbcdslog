@@ -14,9 +14,10 @@ jdbcdslogexp2 is an fork of [jdbcdslog-exp] that, on top of the features provide
 * Can log before and after statement invocations.  Statement logging can be turned off in "after" logging.
 * Better handling in batch-operations.
   * `executeBatch()` will now be logged with, optionally, all statements in batch.
-  * `addBatch()` can be configured to include/exclude statement.
+  * Log messages of `addBatch()` can be configured to be excluded.
 * Dropped pre-JDK5 support and source code is now cleaner with proper use of JDK5+ features like Generics, for-each loop etc.
 * Upgrade to latest SLF4J version, and cleanup of logging codes to be more readable and reduce unnecessary
+* Connection ID in MDC so user can (optionally) distinguish logs originated from different connection, which is especially useful for application connecting to multiple DBs. (2.1)
 * Fix misc bugs and problems in original codebase
 (Of course, the original function does not change!)
 
@@ -26,7 +27,7 @@ if you want get more infos please see the original version of jdbcdslog at <http
     <dependency>
         <groupId>org.jdbcdslog</groupId>
         <artifactId>jdbcdslogexp2</artifactId>
-        <version>2.0</version>
+        <version>2.1-BETA1</version>
     </dependency>
 
 
