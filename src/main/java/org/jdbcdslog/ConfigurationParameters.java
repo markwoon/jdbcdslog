@@ -22,6 +22,7 @@ public class ConfigurationParameters {
     static boolean logBeforeStatement = false;
     static boolean logDetailAfterStatement = true;
     static boolean logAddBatchDetail = true;
+    static boolean logAddBatch = true;
     static boolean logExecuteBatchDetail =true;
 
     static {
@@ -43,6 +44,7 @@ public class ConfigurationParameters {
             initRdbmsSpecifics();
             initLogBeforeStatement();
             initLogDetailAfterStatement();
+            initLogAddBatch();
             initLogAddBatchDetail();
             initLogExecuteBatchDetail();
 
@@ -128,6 +130,10 @@ public class ConfigurationParameters {
         }
     }
 
+
+    private static void initLogAddBatch() {
+        logAddBatch = "true".equalsIgnoreCase(props.getProperty("jdbcdslog.logAddBatch", "true"));
+    }
 
     private static void initLogAddBatchDetail() {
         logAddBatchDetail = "true".equalsIgnoreCase(props.getProperty("jdbcdslog.logAddBatchDetail", "true"));

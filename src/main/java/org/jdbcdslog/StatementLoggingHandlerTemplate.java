@@ -33,10 +33,12 @@ public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupp
         try {
             boolean needsLog = needsLogging(proxy, method, args);
             long startTimeInNano = 0;
+            boolean isAddBatch = isAddBatch(proxy, method, args);
+            boolean isExecuteBatch = isExecuteBatch(proxy, method, args);
             StringBuilder sb= null;
 
-            if (isAddBatch(proxy, method, args)) {
-                if (!ConfigurationParameters.logAddBatchDetail) {
+            if (isAddBatch) {
+                if (!ConfigurationParameters.logAddBatch) {
                     needsLog = false;
                 }
                 if (ConfigurationParameters.logExecuteBatchDetail) {
@@ -53,11 +55,15 @@ public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupp
                 }
                 sb.append(method.getDeclaringClass().getName()).append(".").append(method.getName()).append(": ");
 
-                if (isExecuteBatch(proxy, method, args)) {
+                if (isExecuteBatch) {
                     if (ConfigurationParameters.logExecuteBatchDetail) {
                         appendBatchStatements(sb);
                     }
-                }  else {
+                } else if (isAddBatch) {
+                    if (ConfigurationParameters.logAddBatchDetail) {
+                        appendStatement(sb, proxy, method, args);
+                    }
+                } else {
                     appendStatement(sb, proxy, method, args);
                 }
 
