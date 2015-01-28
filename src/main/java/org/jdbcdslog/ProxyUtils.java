@@ -68,24 +68,24 @@ public class ProxyUtils {
     }
 
 
-    public static Statement wrapByStatementProxy(LogMetaData logMetaData, Object r) {
-        return ProxyUtils.proxyForCompatibleInterfaces(r.getClass(), Statement.class, new StatementLoggingHandler(logMetaData, (Statement) r));
+    public static Statement wrapByStatementProxy(LogMetaData logMetaData, Statement s) {
+        return ProxyUtils.proxyForCompatibleInterfaces(s.getClass(), Statement.class, new StatementLoggingHandler(logMetaData, s));
     }
 
-    public static PreparedStatement wrapByPreparedStatementProxy(LogMetaData logMetaData, Object r, String sql) {
-        return ProxyUtils.proxyForCompatibleInterfaces(r.getClass(), PreparedStatement.class, new PreparedStatementLoggingHandler(logMetaData, (PreparedStatement) r, sql));
+    public static PreparedStatement wrapByPreparedStatementProxy(LogMetaData logMetaData, PreparedStatement ps, String sql) {
+        return ProxyUtils.proxyForCompatibleInterfaces(ps.getClass(), PreparedStatement.class, new PreparedStatementLoggingHandler(logMetaData, ps, sql));
     }
 
-    public static CallableStatement wrapByCallableStatementProxy(LogMetaData logMetaData, Object r, String sql) {
-        return ProxyUtils.proxyForCompatibleInterfaces(r.getClass(), CallableStatement.class, new CallableStatementLoggingHandler(logMetaData, (CallableStatement) r, sql));
+    public static CallableStatement wrapByCallableStatementProxy(LogMetaData logMetaData, CallableStatement cs, String sql) {
+        return ProxyUtils.proxyForCompatibleInterfaces(cs.getClass(), CallableStatement.class, new CallableStatementLoggingHandler(logMetaData, cs, sql));
     }
 
-    public static Connection wrapByConnectionProxy(Object r) {
-        return ProxyUtils.proxyForCompatibleInterfaces(r.getClass(), Connection.class, new ConnectionLoggingHandler(r));
+    public static Connection wrapByConnectionProxy(Connection c) {
+        return ProxyUtils.proxyForCompatibleInterfaces(c.getClass(), Connection.class, new ConnectionLoggingHandler(c));
     }
 
-    public static Connection wrapByConnectionProxy(LogMetaData logMetaData, Object r) {
-        return ProxyUtils.proxyForCompatibleInterfaces(r.getClass(), Connection.class, new ConnectionLoggingHandler(logMetaData, r));
+    public static Connection wrapByConnectionProxy(LogMetaData logMetaData, Connection c) {
+        return ProxyUtils.proxyForCompatibleInterfaces(c.getClass(), Connection.class, new ConnectionLoggingHandler(logMetaData, c));
     }
 
     public static ResultSet wrapByResultSetProxy(LogMetaData logMetaData, ResultSet r) {
@@ -115,15 +115,15 @@ public class ProxyUtils {
      */
     public static Object wrap(LogMetaData logMetaData, Object r, Object...args) {
         if (r instanceof Connection) {
-            return wrapByConnectionProxy(logMetaData,r);
+            return wrapByConnectionProxy(logMetaData, (Connection)r);
         } else if (r instanceof CallableStatement) {
-            return wrapByCallableStatementProxy(logMetaData,r, (String) args[0]);
+            return wrapByCallableStatementProxy(logMetaData, (CallableStatement) r, (String) args[0]);
         } else if (r instanceof PreparedStatement) {
-            return wrapByPreparedStatementProxy(logMetaData,r, (String) args[0]);
+            return wrapByPreparedStatementProxy(logMetaData, (PreparedStatement) r, (String) args[0]);
         } else if (r instanceof Statement) {
-            return wrapByStatementProxy(logMetaData,r);
+            return wrapByStatementProxy(logMetaData, (Statement)r);
         } else if (r instanceof ResultSet) {
-            return wrapByResultSetProxy(logMetaData,(ResultSet) r);
+            return wrapByResultSetProxy(logMetaData, (ResultSet) r);
         } else {
             return r;
         }

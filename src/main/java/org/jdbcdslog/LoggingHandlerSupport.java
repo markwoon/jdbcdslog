@@ -8,12 +8,12 @@ import java.lang.reflect.Method;
  *
  * @author a511990
  */
-public abstract class LoggingHandlerSupport implements InvocationHandler {
+public abstract class LoggingHandlerSupport<T> implements InvocationHandler {
     protected final static String UNWRAP_METHOD_NAME = "unwrap";
 
-    protected Object target = null;
+    protected T target = null;
 
-    public LoggingHandlerSupport(Object target) {
+    public LoggingHandlerSupport(T target) {
         this.target = target;
     }
 

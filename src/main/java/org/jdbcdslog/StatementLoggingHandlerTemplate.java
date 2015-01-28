@@ -5,6 +5,7 @@ import static org.jdbcdslog.Loggers.*;
 import static org.jdbcdslog.ProxyUtils.wrap;
 
 import java.lang.reflect.Method;
+import java.sql.Statement;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -15,14 +16,14 @@ import org.slf4j.Logger;
  *
  * @author a511990
  */
-public abstract class StatementLoggingHandlerTemplate extends LoggingHandlerSupport {
+public abstract class StatementLoggingHandlerTemplate<T extends Statement> extends LoggingHandlerSupport<T> {
     protected LogMetaData logMetaData;
 
-    public StatementLoggingHandlerTemplate(Object target) {
+    public StatementLoggingHandlerTemplate(T target) {
         super(target);
     }
 
-    public StatementLoggingHandlerTemplate(LogMetaData logMetaData, Object target) {
+    public StatementLoggingHandlerTemplate(LogMetaData logMetaData, T target) {
         super(target);
         this.logMetaData = logMetaData;
     }

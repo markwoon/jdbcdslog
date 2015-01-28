@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class StatementLoggingHandler extends StatementLoggingHandlerTemplate {
+public class StatementLoggingHandler extends StatementLoggingHandlerTemplate<Statement> {
     protected final static Set<String> EXECUTE_METHODS = new HashSet<String>(Arrays.asList("addBatch", "execute", "executeQuery", "executeUpdate", "executeBatch"));
     protected StringBuilder batchStatements = null;
     protected LogMetaData logMetaData;
@@ -61,7 +61,7 @@ public class StatementLoggingHandler extends StatementLoggingHandlerTemplate {
             if (r == target && unwrapClass.isInstance(proxy)) {
                 r = proxy;      // returning original proxy if it is enough to represent the unwrapped obj
             } else if (unwrapClass.isInterface() && Statement.class.isAssignableFrom(unwrapClass)) {
-                r = wrapByStatementProxy(logMetaData, r);
+                r = wrapByStatementProxy(logMetaData, (Statement)r);
             }
         }
 

@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class PreparedStatementLoggingHandler extends StatementLoggingHandlerTemplate {
+public class PreparedStatementLoggingHandler extends StatementLoggingHandlerTemplate<PreparedStatement> {
     protected Map<Integer, Object> parameters = new TreeMap<Integer, Object>();
 
     protected String sql = null;
@@ -71,7 +71,7 @@ public class PreparedStatementLoggingHandler extends StatementLoggingHandlerTemp
             if (r == target && unwrapClass.isInstance(proxy)) {
                 r = proxy;      // returning original proxy if it is enough to represent the unwrapped obj
             } else if (unwrapClass.isInterface() && PreparedStatement.class.isAssignableFrom(unwrapClass)) {
-                r = wrapByPreparedStatementProxy(logMetaData, r, sql);
+                r = wrapByPreparedStatementProxy(logMetaData, (PreparedStatement)r, sql);
             }
         }
 

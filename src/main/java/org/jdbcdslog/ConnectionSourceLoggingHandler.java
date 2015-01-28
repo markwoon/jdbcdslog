@@ -24,7 +24,7 @@ import java.lang.reflect.Method;
  *
  * @author a511990
  */
-public class ConnectionSourceLoggingHandler extends LoggingHandlerSupport {
+public class ConnectionSourceLoggingHandler extends LoggingHandlerSupport<Object> {
     public ConnectionSourceLoggingHandler(Object target) {
         super(target);
     }

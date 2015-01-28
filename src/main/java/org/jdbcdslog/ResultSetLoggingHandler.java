@@ -8,15 +8,13 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.Map;
 
-public class ResultSetLoggingHandler extends LoggingHandlerSupport {
-    private ResultSet targetResultSet = null;
+public class ResultSetLoggingHandler extends LoggingHandlerSupport<ResultSet> {
     private int resultCount = 0;
     private long totalFetchTime = 0;
     private LogMetaData logMetaData = null;
 
     public ResultSetLoggingHandler(LogMetaData logMetaData, ResultSet target) {
         super(target);
-        this.targetResultSet = target;
     }
 
     @Override
@@ -27,7 +25,7 @@ public class ResultSetLoggingHandler extends LoggingHandlerSupport {
         Map<String, String> oldMdc = LogUtils.setMdc(logMetaData);
         try {
             try {
-                r = method.invoke(targetResultSet, args);
+                r = method.invoke(target, args);
             } catch (Throwable e) {
                 LogUtils.handleException(e, resultSetLogger, LogUtils.createLogEntry(method, null, null, null));
             }
@@ -37,7 +35,7 @@ public class ResultSetLoggingHandler extends LoggingHandlerSupport {
                 if (r == target && unwrapClass.isInstance(proxy)) {
                     r = proxy;      // returning original proxy if it is enough to represent the unwrapped obj
                 } else if (unwrapClass.isInterface() && ResultSet.class.isAssignableFrom(unwrapClass)) {
-                    r = wrapByResultSetProxy(logMetaData, targetResultSet);
+                    r = wrapByResultSetProxy(logMetaData, target);
                 }
             }
 
@@ -50,7 +48,7 @@ public class ResultSetLoggingHandler extends LoggingHandlerSupport {
                     ++resultCount;
                     if (resultSetLogger.isDebugEnabled()) {
 
-                        ResultSetMetaData md = targetResultSet.getMetaData();
+                        ResultSetMetaData md = target.getMetaData();
                         StringBuilder sb = new StringBuilder(method.getDeclaringClass().getName()).append(".").append(method.getName()).append(": ");
 
                         sb.append(" {");
@@ -58,7 +56,7 @@ public class ResultSetLoggingHandler extends LoggingHandlerSupport {
                             if ( i > 1) {
                                 sb.append(", ");
                             }
-                            sb.append(ConfigurationParameters.rdbmsSpecifics.formatParameter(targetResultSet.getObject(i)));
+                            sb.append(ConfigurationParameters.rdbmsSpecifics.formatParameter(target.getObject(i)));
                         }
                         sb.append("} Row Number: ").append(resultCount);
 
