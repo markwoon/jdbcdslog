@@ -36,9 +36,9 @@ public class StatementLoggingHandler extends StatementLoggingHandlerTemplate<Sta
     protected void doAddBatch(Object proxy, Method method, Object[] args) {
         if (this.batchStatements == null) {
             this.batchStatements = new StringBuilder();
+        } else {
+            this.batchStatements.append("\n\t");
         }
-
-        this.batchStatements.append("\n");
         appendStatement(batchStatements, proxy, method, args);
         this.batchStatements.append(';');
 
