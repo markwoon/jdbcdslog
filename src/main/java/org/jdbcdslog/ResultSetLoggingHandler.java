@@ -28,7 +28,7 @@ public class ResultSetLoggingHandler extends LoggingHandlerSupport<ResultSet> {
             try {
                 r = method.invoke(target, args);
             } catch (Throwable e) {
-                LogUtils.handleException(e, resultSetLogger, LogUtils.createLogEntry(method, null, null, null));
+                LogUtils.handleException(e, resultSetLogger, LogUtils.createLogEntry(logMetaData, method, null, null, null));
             }
 
             if (UNWRAP_METHOD_NAME.equals(method.getName())) {
@@ -50,7 +50,8 @@ public class ResultSetLoggingHandler extends LoggingHandlerSupport<ResultSet> {
                     if (resultSetLogger.isDebugEnabled()) {
 
                         ResultSetMetaData md = target.getMetaData();
-                        StringBuilder sb = new StringBuilder(method.getDeclaringClass().getName()).append(".").append(method.getName()).append(": ");
+                        StringBuilder sb = new StringBuilder("[Conn #").append(logMetaData.getConnectionId()).append("] ")
+                                .append(method.getDeclaringClass().getName()).append(".").append(method.getName()).append(": ");
 
                         sb.append(" {");
                         for (int i = 1; i <= md.getColumnCount(); i++) {
@@ -69,9 +70,10 @@ public class ResultSetLoggingHandler extends LoggingHandlerSupport<ResultSet> {
 
                 } else {
 
-                    StringBuilder sb = new StringBuilder(method.getDeclaringClass().getName()).append(".").append(method.getName()).append(": ")
-                                            .append(" Total Results: ").append(resultCount)
-                                            .append(".  Total Fetch Time: ").append(String.format("%.9f", totalFetchTime/1000000000.0)).append(" s.");
+                    StringBuilder sb = new StringBuilder("[Conn #").append(logMetaData.getConnectionId()).append("] ")
+                            .append(method.getDeclaringClass().getName()).append(".").append(method.getName()).append(": ")
+                            .append(" Total Results: ").append(resultCount)
+                            .append(".  Total Fetch Time: ").append(String.format("%.9f", totalFetchTime/1000000000.0)).append(" s.");
                     totalFetchTime = 0;
                     LogUtils.appendStackTrace(sb);
                     LogUtils.appendElapsedTime(sb, elapsedTimeInNano);

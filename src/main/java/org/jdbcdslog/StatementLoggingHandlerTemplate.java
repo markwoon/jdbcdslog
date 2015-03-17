@@ -122,7 +122,7 @@ public abstract class StatementLoggingHandlerTemplate<T extends Statement> exten
 
     protected void logBeforeInvoke(Object proxy, Method method, Object[] args, StringBuilder sb) {
         if (ConfigurationParameters.logBeforeStatement) {
-            getLogger().info(sb.toString());
+            getLogger().info("[Conn #{}] {}", logMetaData.getConnectionId(), sb.toString());
         }
     }
 
@@ -132,16 +132,18 @@ public abstract class StatementLoggingHandlerTemplate<T extends Statement> exten
 
     protected void logAfterInvoke(Object proxy, Method method, Object[] args, Object result, long elapsedTimeInNano, StringBuilder message) {
 
-        StringBuilder endMessage = message;
+        StringBuilder endMessage = new StringBuilder("[Conn #").append(logMetaData.getConnectionId()).append("] ");
         if ( ! ConfigurationParameters.logDetailAfterStatement) {
             // replace the log message to a simple message
 
-            endMessage = new StringBuilder("END:    ")
+            endMessage.append("END:    ")
                         .append(method.getDeclaringClass().getName()).append(".").append(method.getName())
                         .append(": ");
             appendStackTrace(endMessage);
             appendElapsedTime(endMessage, elapsedTimeInNano);
 
+        } else {
+            endMessage.append(message);
         }
 
         getLogger().info(endMessage.toString());
@@ -157,7 +159,7 @@ public abstract class StatementLoggingHandlerTemplate<T extends Statement> exten
     }
 
     protected void handleException(Throwable t, Object proxy, Method method, Object[] args) throws Throwable {
-        LogUtils.handleException(t, getLogger(), LogUtils.createLogEntry(method, null, null, null));
+        LogUtils.handleException(t, getLogger(), LogUtils.createLogEntry(logMetaData, method, null, null, null));
     }
 
     protected Logger getLogger() {

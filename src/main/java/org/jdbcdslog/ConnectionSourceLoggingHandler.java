@@ -37,7 +37,7 @@ public class ConnectionSourceLoggingHandler extends LoggingHandlerSupport<Object
             return wrap(null, r);
 
         } catch (Throwable t) {
-            LogUtils.handleException(t, connectionLogger, LogUtils.createLogEntry(method, null, null, null));
+            LogUtils.handleException(t, connectionLogger, LogUtils.createLogEntry(null, method, null, null, null));
         }
         return null;
     }

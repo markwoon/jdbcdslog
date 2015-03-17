@@ -41,11 +41,18 @@ public class LogUtils {
 
     }
 
-    public static String appendStackTrace(String message) {
+    public static String appendStackTrace(LogMetaData logMetaData, String message) {
+        StringBuilder sb = new StringBuilder();
+        if (logMetaData != null) {
+            sb.append("[Conn #")
+                    .append(logMetaData.getConnectionId())
+                    .append("] ");
+        }
+        sb.append(message);
         if (ConfigurationParameters.printStackTrace) {
-            return appendStackTrace(new StringBuilder(message)).toString();
+            return appendStackTrace(sb).toString();
         } else {
-            return message;
+            return sb.toString();
         }
     }
 
@@ -92,8 +99,12 @@ public class LogUtils {
         return i;
     }
 
-    public static StringBuilder createLogEntry(Method method, String sql, Map<Integer,Object> parameters, Map<String,Object> namedParameters) {
+    public static StringBuilder createLogEntry(LogMetaData logMetaData, Method method, String sql, Map<Integer,Object> parameters, Map<String,Object> namedParameters) {
         StringBuilder s = new StringBuilder();
+        if (logMetaData != null) {
+            s.append("[Conn #").append(logMetaData.getConnectionId()).append("] ");
+        }
+
         if (method != null) {
             s.append(method.getDeclaringClass().getName()).append(".").append(method.getName()).append(": ");
         }

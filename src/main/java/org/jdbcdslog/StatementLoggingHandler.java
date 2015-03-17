@@ -74,7 +74,7 @@ public class StatementLoggingHandler extends StatementLoggingHandlerTemplate<Sta
     protected void handleException(Throwable t, Object proxy, Method method, Object[] args) throws Throwable {
         LogUtils.handleException(t,
                 statementLogger,
-                LogUtils.createLogEntry(method, (args == null || args.length == 0) ? null : args[0].toString(), null, null));
+                LogUtils.createLogEntry(logMetaData, method, (args == null || args.length == 0) ? null : args[0].toString(), null, null));
     }
 
 }

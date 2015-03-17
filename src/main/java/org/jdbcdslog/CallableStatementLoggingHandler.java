@@ -81,7 +81,7 @@ public class CallableStatementLoggingHandler extends PreparedStatementLoggingHan
 
     @Override
     protected void handleException(Throwable t, Object proxy, Method method, Object[] args) throws Throwable {
-        LogUtils.handleException(t, statementLogger, LogUtils.createLogEntry(method, sql, parameters, namedParameters));
+        LogUtils.handleException(t, statementLogger, LogUtils.createLogEntry(logMetaData, method, sql, parameters, namedParameters));
     }
 
 }

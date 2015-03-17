@@ -48,7 +48,7 @@ public class ConnectionLoggingHandler extends LoggingHandlerSupport<Connection> 
             if (method.getName().equals("commit") ||
                     method.getName().equals("rollback")) {
                 if (connectionLogger.isInfoEnabled()) {
-                    connectionLogger.info(LogUtils.appendStackTrace(method.getName()));
+                    connectionLogger.info(LogUtils.appendStackTrace(logMetaData, method.getName()));
                 }
             }
             Object r = method.invoke(target, args);
@@ -70,7 +70,7 @@ public class ConnectionLoggingHandler extends LoggingHandlerSupport<Connection> 
             }
             return r;
         } catch (Throwable t) {
-            LogUtils.handleException(t, connectionLogger, LogUtils.createLogEntry(method, null, null, null));
+            LogUtils.handleException(t, connectionLogger, LogUtils.createLogEntry(logMetaData, method, null, null, null));
         } finally {
             LogUtils.resetMdc(oldMdc);
         }
