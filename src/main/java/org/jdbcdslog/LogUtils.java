@@ -150,21 +150,23 @@ public class LogUtils {
         if (ConfigurationParameters.inlineQueryParams) {
             if (parameters != null) {
                 for (Map<Integer, Object> p : parameters) {
-                    s.append("\n");
+                    if (s.length() > 0) {
+                        s.append("\n\t");
+                    }
                     appendSqlWithInlineIndexedParams(s, sql, p);
                 }
             }
             if (namedParameters != null) {
                 for (Map<String, Object> p : namedParameters) {
-                    s.append("\n");
+                    if (s.length() > 0) {
+                        s.append("\n\t");
+                    }
                     appendSqlWithInlineNamedParams(s, sql, p);
                 }
             }
         } else {    // display separate query parameters
             appendBatchSqlsWithSeparateParams(s, sql, parameters, namedParameters);
-
         }
-
     }
 
     protected static void appendBatchSqlsWithSeparateParams(StringBuilder s,
@@ -354,8 +356,6 @@ public class LogUtils {
         for (int i = start; i < textLength; i++) {
             buf.append(text.charAt(i));
         }
-        String result = buf.toString();
-
-        return result;
+        return buf.toString();
     }
 }
