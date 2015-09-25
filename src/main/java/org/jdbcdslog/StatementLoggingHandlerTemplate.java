@@ -27,12 +27,12 @@ public abstract class StatementLoggingHandlerTemplate<T extends Statement> exten
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
         Map<String, String> oldMdc = LogUtils.setMdc(logMetaData);
+        StringBuilder sb = null;
         try {
             boolean needsLog = needsLogging(proxy, method, args);
             long startTimeInNano = 0;
             boolean isAddBatch = isAddBatch(proxy, method, args);
             boolean isExecuteBatch = isExecuteBatch(proxy, method, args);
-            StringBuilder sb= null;
 
             if (isAddBatch) {
                 if (!ConfigurationParameters.logAddBatch) {
@@ -66,7 +66,9 @@ public abstract class StatementLoggingHandlerTemplate<T extends Statement> exten
 
                 appendStackTrace(sb);
 
-                logBeforeInvoke(proxy, method, args, sb);
+                if (ConfigurationParameters.logBeforeStatement) {
+                    logBeforeInvoke(proxy, method, args, sb);
+                }
             }
 
             Object result = method.invoke(target, args);
@@ -77,13 +79,7 @@ public abstract class StatementLoggingHandlerTemplate<T extends Statement> exten
                 long elapsedTimeInNano = System.nanoTime() - startTimeInNano;
 
                 if (ConfigurationParameters.logBeforeStatement) {
-                    sb.setCharAt(0, 'E');
-                    sb.setCharAt(1, 'N');
-                    sb.setCharAt(2, 'D');
-                    sb.setCharAt(3, ':');
-                    sb.setCharAt(4, ' ');
-                    sb.setCharAt(5, ' ');
-                    sb.setCharAt(6, ' ');
+                    sb.insert(0, "END:   ");
                 }
 
                 appendElapsedTime(sb, elapsedTimeInNano);
@@ -93,6 +89,10 @@ public abstract class StatementLoggingHandlerTemplate<T extends Statement> exten
             return result;
 
         } catch (Throwable t) {
+            // if did not log before invoke, make sure we log it now so that we don't lose the information
+            if (sb != null && !ConfigurationParameters.logBeforeStatement) {
+                logBeforeInvoke(proxy, method, args, sb);
+            }
             handleException(t, proxy, method, args);
         } finally {
             LogUtils.resetMdc(oldMdc);
@@ -121,9 +121,7 @@ public abstract class StatementLoggingHandlerTemplate<T extends Statement> exten
     }
 
     protected void logBeforeInvoke(Object proxy, Method method, Object[] args, StringBuilder sb) {
-        if (ConfigurationParameters.logBeforeStatement) {
-            getLogger().info("[Conn #{}] {}", logMetaData.getConnectionId(), sb.toString());
-        }
+        getLogger().info("[Conn #{}] {}", logMetaData.getConnectionId(), sb.toString());
     }
 
     protected Object doAfterInvoke(Object proxy, Method method, Object[] args, Object result) {
