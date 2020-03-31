@@ -269,7 +269,12 @@ public class DataSourceProxyBase implements Serializable {
         invokeTargetSetMethod("setDatabase", p, String.class);
     }
 
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+  public void setApplicationName(String p) throws JdbcDsLogRuntimeException {
+    p = initTargetDS(p);
+    invokeTargetSetMethod("setApplicationName", p, String.class);
+  }
+
+  public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return false;
     }
 
